@@ -29,10 +29,9 @@ public class JavaToR {
 	private static final double NA_DOUBLE = Double.longBitsToDouble(0x7ff00000000007a2L);
 	
 	/*
-	 * rJava translates NA to FALSE for logicals (i.e. booleans), but we
-	 * override that behavior by default to follow rscala and Rcpp.
+	 * rJava translates NA to FALSE for logicals (i.e. booleans).
 	 */ 
-	private static final boolean NA_ASSUMPTION_LOGICAL = true;
+	private static final boolean NA_ASSUMPTION_LOGICAL = false;
 	private static final byte NA_ASSUMPTION_RAW = 0;
 	
 	public enum ArrayOrder {

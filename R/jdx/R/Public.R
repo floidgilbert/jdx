@@ -196,8 +196,8 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
   }
 
   # Always place after test for data frame because is.list() will return TRUE for data frames.
-  if (value.is.list) {
-    # Catch POSIXlt/POSIXt
+  if (value.is.list || is.environment(value)) {
+    # Catch POSIXlt/POSIXt. They can be detected as lists.
     if (inherits(value, "POSIXlt"))
       throwUnsupportedRtypeException("POSIXlt")
     names <- names(value)
@@ -234,35 +234,9 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
 #///this is not thread-safe, correct? if you want something thread-safe, probably use low-level interface.
 #' @export
 convertToR <- function(value, strings.as.factors = NULL, array.order = "row-major") {
-  
-  
-  private$ARRAY_ORDER_COLUMN_MAJOR <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "COLUMN_MAJOR")
-  private$ARRAY_ORDER_ROW_MAJOR <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR")
-  private$ARRAY_ORDER_ROW_MAJOR_JAVA <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR_JAVA")
-  
-  
-  order <- rJava::.jcall(private$controller, "Lorg/fgilbert/jdx/JavaToR$ArrayOrder;", "getArrayOrder")
-  if (rJava::.jequals(order, private$ARRAY_ORDER_ROW_MAJOR))
-    return("row-major")
-  if (rJava::.jequals(order, private$ARRAY_ORDER_ROW_MAJOR_JAVA))
-    return("row-major-java")
-  "column-major"
-  
-
-  order <- switch (value,
-    `row-major` = private$ARRAY_ORDER_ROW_MAJOR
-    , `row-major-java` = private$ARRAY_ORDER_ROW_MAJOR_JAVA
-    , `column-major` = private$ARRAY_ORDER_COLUMN_MAJOR
-    , ... = NULL
-  )
-  
-    
-  
-  
-  #///array.order/// validate it and pass it to j2r.initialize
-  composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE), array.order)
+  composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE), array.order.values[[array.order]])
   data.code <- processCompositeDataCode(jdx.j2r, composite.data.code)
-  convertToRlowLevel(jdx.j2r, data.code, strings.as.factors, array.order)
+  convertToRlowLevel(jdx.j2r, data.code, strings.as.factors)
 }
 
 #' @export

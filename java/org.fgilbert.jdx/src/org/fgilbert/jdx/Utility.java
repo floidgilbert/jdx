@@ -179,7 +179,7 @@ public class Utility {
 			subarrayCount *= dimensions[i];
 		int rowCount = dimensions[dimensions.length - 2];
 		int columnCount = dimensions[dimensions.length - 1];
-		int dataOffset = rowCount * columnCount;
+///		int dataOffset = rowCount * columnCount;
 		int currentDataIndex = 0;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
 		for (int i = 0; i < subarrayCount; i++) {

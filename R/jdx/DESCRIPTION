@@ -11,4 +11,7 @@ License: GPL (>= 2) | BSD_3_clause + file LICENSE
 Imports: rJava (>= 0.9-8), utils (>= 3.3.0)
 SystemRequirements: Java Runtime Environment (>= 1.8)
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

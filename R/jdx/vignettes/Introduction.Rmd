@@ -1,0 +1,91 @@
+---
+title: "Introduction to jdx: Java Data Exchange for R"
+output:
+  rmarkdown::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Introduction to R6 classes}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Java Data Exchange for R
+
+The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbanek's excellent [rJava](https://cran.r-project.org/package=rJava) project to simplify and extend data exchange between R and Java. Together, jdx and rJava provide a potent low-level interface for the Java platform. 
+The jdx package was originally developed to provide data exchange functionality for [jsr223](https://cran.r-project.org/package=jsr223), the high-level scripting interface for the Java platform. We provide jdx to developers who want to extend existing interfaces to Java. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.
+
+The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, matrices, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java objects implementing common Java classes are converted to R vectors, matrices, n-dimensional arrays, data frames, and lists. Several options are available for data conversion such as row-major vs. column-major ordering for arrays and data frames.
+
+**Warning**: The jdx package behavior diverges slightly for R vectors of type `raw` and Java values of type `byte` and `java.lang.Byte`. Please see sections [R raw Values and Java byte Values](#R_raw_Java_byte) for more information.
+
+## Primary Functions
+
+This example demonstrates the primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering for arrays by default.
+
+```{r}
+library("jdx")
+m1 <- matrix(1:4, 2, 2)
+m1
+# Convert the matrix to a Java two-dimensional array (int[][]).
+o <- convertToJava(m1)
+
+# Display the class name.
+getJavaClassName(o)
+
+# Use rJava::.jcall to invoke the java.util.Arrays.deepToString
+# method. deepToString requires a parameter of Object[]. Cast
+# our int[][] array to Object[] before calling the method.
+o <- rJava::.jcast(o, "[Ljava/lang/Object;")
+rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
+
+# Convert the Java array back to an R matrix and show that
+# it is identical to the original copy.
+m2 <- convertToR(o)
+identical(m1, m2)
+```
+
+Both `convertToJava()` and `convertToR()` feature several data conversion parameters that will be covered in following sections.
+
+## R NA Values and Java null Values
+
+
+
+## R raw Values and Java byte Values # {#R_raw_Java_byte}
+
+
+
+## Converting R Objects to Java Objects
+
+The jdx package provides a single function, `convertToJava()`, to handle conversion for all R objects instead of providing separate functions for vectors, arrays, data frames, etc. This design facilitates dynamically-typed programming. Consider, for example, an overloaded Java method `setValue()`, that has different method signatures for a wide variety of data types and structures. If we use `rJava::.jcall(object, "V", "setValue", convertToJava(value))`, the correct Java method is automatically selected based on the return value of `convertToJava()`.
+
+The `convertToJava()` function provides several data conversion parameters:
+
+```{r eval=FALSE}
+convertToJava(
+  value,
+  length.one.vector.as.array = FALSE,
+  scalars.as.objects = FALSE,
+  array.order = "row-major",
+  data.frame.row.major = TRUE,
+  coerce.factors = TRUE
+)
+```
+
+The parameters `length.one.vector.as.array` and `scalars.as.objects` control if and how length one vectors are converted to Java scalars. The parameter `array.order` affects the index order of matrices and n-dimensional arrays. The parameter `data.frame.row.major` specifies whether data frames are converted using row-major or column-major order. Finally, `coerce.factors` determines whether an attempt should be made to coerce the character vector backing factors to `double`, `int`, or `boolean` Java arrays. The following sections cover each of these topics in detail as well as data conversion rules and behaviors.
+
+### Vectors of Length One
+
+The parameters `length.one.vector.as.array` and `scalars.as.objects` control how R vectors of length one are converted to Java objects. If `length.one.vector.as.array` is `TRUE`, length-one vectors are converted to Java arrays. This is equivalent to passing an R vector to `rJava::.jarray`. The "As Is" R function, `base::I()`, can also be used to indicate that a length-one vector should be converted to a Java array. For example, `convertToJava(I(1))` produces a Java array even though the default value for `length.one.vector.as.array` is `FALSE`. The `I()` function has no effect for other R object types.
+
+If `length.one.vector.as.array` is `FALSE` (the default), length-one vectors are handled as scalar values. If `scalars.as.objects` is also `FALSE` (the default), `convertToJava()` will return the original R vector instead of creating a Java object for `numeric`, `integer`, `logical`, and `character` length-one vectors. rJava requires these structures to indicate Java `double`, `int`, `boolean`, and `String` method parameters, respectively. However, if the R vector type is `raw`, `convertToJava()` returns an object of class `jbyte` to notify rJava that the value should be converted to a Java `byte`.
+
+If `length.one.vector.as.array` is `FALSE` and `scalars.as.objects` is `TRUE`, length-one vectors will be converted to so-called *boxed* scalars. That is, `numeric`, `integer`, `logical`, `raw`, and `character` vectors of length one are converted to `java.lang.Double`, `java.lang.Integer`, `java.lang.Boolean`, `java.lang.Byte`, and `java.lang.String` values, respectively.
+
+
+## Converting Java Objects to R Objects
+
+## R Raw Values

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Introduction to jdx: Java Data Exchange for R</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to jdx: Java Data Exchange for R</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#java-data-exchange-for-r">Java Data Exchange for R</a></li>
+<li><a href="#primary-functions">Primary Functions</a></li>
+<li><a href="#R_NA_Java_null">R NA Values and Java null Values</a></li>
+<li><a href="#r-raw-values-and-java-byte-values">R raw Values and Java byte Values</a></li>
+<li><a href="#converting-r-objects-to-java-objects">Converting R Objects to Java Objects</a><ul>
+<li><a href="#vectors-of-length-one">Vectors of Length One</a></li>
+</ul></li>
+<li><a href="#converting-java-objects-to-r-objects">Converting Java Objects to R Objects</a></li>
+<li><a href="#r-raw-values">R Raw Values</a></li>
+</ul>
+</div>
+
+<div id="java-data-exchange-for-r" class="section level2">
+<h2>Java Data Exchange for R</h2>
+<p>The <a href="https://cran.r-project.org/package=jdx">jdx</a> package builds on Simon Urbanek’s excellent <a href="https://cran.r-project.org/package=rJava">rJava</a> project to simplify and extend data exchange between R and Java. Together, jdx and rJava provide a potent low-level interface for the Java platform. The jdx package was originally developed to provide data exchange functionality for <a href="https://cran.r-project.org/package=jsr223">jsr223</a>, the high-level scripting interface for the Java platform. We provide jdx to developers who want to extend existing interfaces to Java. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.</p>
+<p>The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, matrices, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java objects implementing common Java classes are converted to R vectors, matrices, n-dimensional arrays, data frames, and lists. Several options are available for data conversion such as row-major vs. column-major ordering for arrays and data frames.</p>
+<p><strong>Warning</strong>: The jdx package behavior diverges from rJava for R vectors of type <code>logical</code> and <code>raw</code> as well as Java values of type <code>boolean</code>, <code>java.lang.Boolean</code>, <code>byte</code>, and <code>java.lang.Byte</code>. Please see sections <a href="#R_NA_Java_null">R NA Values and Java null Values</a> for more information.</p>
+</div>
+<div id="primary-functions" class="section level2">
+<h2>Primary Functions</h2>
+<p>This example demonstrates the primary functions in jdx: <code>convertToJava()</code>, <code>convertToR()</code>, and <code>getJavaClassName()</code>. Notice that the call to <code>Arrays.deepToString()</code> reveals that <code>convertToJava()</code> uses row-major ordering for arrays by default.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;jdx&quot;</span>)
+m1 &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">2</span>)
+m1</code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    1    3
+## [2,]    2    4</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Convert the matrix to a Java two-dimensional array (int[][]).</span>
+o &lt;-<span class="st"> </span><span class="kw">convertToJava</span>(m1)
+
+<span class="co"># Display the class name.</span>
+<span class="kw">getJavaClassName</span>(o)</code></pre></div>
+<pre><code>## [1] &quot;[[I&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Use rJava::.jcall to invoke the java.util.Arrays.deepToString</span>
+<span class="co"># method. deepToString requires a parameter of Object[]. Cast</span>
+<span class="co"># our int[][] array to Object[] before calling the method.</span>
+o &lt;-<span class="st"> </span>rJava::<span class="kw">.jcast</span>(o, <span class="st">&quot;[Ljava/lang/Object;&quot;</span>)
+rJava::<span class="kw">.jcall</span>(<span class="st">&quot;java/util/Arrays&quot;</span>, <span class="st">&quot;S&quot;</span>, <span class="st">&quot;deepToString&quot;</span>, o)</code></pre></div>
+<pre><code>## [1] &quot;[[1, 3], [2, 4]]&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Convert the Java array back to an R matrix and show that</span>
+<span class="co"># it is identical to the original copy.</span>
+m2 &lt;-<span class="st"> </span><span class="kw">convertToR</span>(o)
+<span class="kw">identical</span>(m1, m2)</code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Both <code>convertToJava()</code> and <code>convertToR()</code> feature several data conversion parameters that will be covered in following sections.</p>
+</div>
+<div id="R_NA_Java_null" class="section level2">
+<h2>R NA Values and Java null Values</h2>
+</div>
+<div id="r-raw-values-and-java-byte-values" class="section level2">
+<h2>R raw Values and Java byte Values</h2>
+</div>
+<div id="converting-r-objects-to-java-objects" class="section level2">
+<h2>Converting R Objects to Java Objects</h2>
+<p>The jdx package provides a single function, <code>convertToJava()</code>, to handle conversion for all R objects instead of providing separate functions for vectors, arrays, data frames, etc. This design facilitates dynamically-typed programming. Consider, for example, an overloaded Java method <code>setValue()</code>, that has different method signatures for a wide variety of data types and structures. If we use <code>rJava::.jcall(object, &quot;V&quot;, &quot;setValue&quot;, convertToJava(value))</code>, the correct Java method is automatically selected based on the return value of <code>convertToJava()</code>.</p>
+<p>The <code>convertToJava()</code> function provides several data conversion parameters:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">convertToJava</span>(
+  value,
+  <span class="dt">length.one.vector.as.array =</span> <span class="ot">FALSE</span>,
+  <span class="dt">scalars.as.objects =</span> <span class="ot">FALSE</span>,
+  <span class="dt">array.order =</span> <span class="st">&quot;row-major&quot;</span>,
+  <span class="dt">data.frame.row.major =</span> <span class="ot">TRUE</span>,
+  <span class="dt">coerce.factors =</span> <span class="ot">TRUE</span>
+)</code></pre></div>
+<p>The parameters <code>length.one.vector.as.array</code> and <code>scalars.as.objects</code> control if and how length one vectors are converted to Java scalars. The parameter <code>array.order</code> affects the index order of matrices and n-dimensional arrays. The parameter <code>data.frame.row.major</code> specifies whether data frames are converted using row-major or column-major order. Finally, <code>coerce.factors</code> determines whether an attempt should be made to coerce the character vector backing factors to <code>double</code>, <code>int</code>, or <code>boolean</code> Java arrays. The following sections cover each of these topics in detail as well as data conversion rules and behaviors.</p>
+<div id="vectors-of-length-one" class="section level3">
+<h3>Vectors of Length One</h3>
+<p>The parameters <code>length.one.vector.as.array</code> and <code>scalars.as.objects</code> control how R vectors of length one are converted to Java objects. If <code>length.one.vector.as.array</code> is <code>TRUE</code>, length-one vectors are converted to Java arrays. This is equivalent to passing an R vector to <code>rJava::.jarray</code>. The “As Is” R function, <code>base::I()</code>, can also be used to indicate that a length-one vector should be converted to a Java array. For example, <code>convertToJava(I(1))</code> produces a Java array even though the default value for <code>length.one.vector.as.array</code> is <code>FALSE</code>. The <code>I()</code> function has no effect for other R object types.</p>
+<p>If <code>length.one.vector.as.array</code> is <code>FALSE</code> (the default), length-one vectors are handled as scalar values. If <code>scalars.as.objects</code> is also <code>FALSE</code> (the default), <code>convertToJava()</code> will return the original R vector instead of creating a Java object for <code>numeric</code>, <code>integer</code>, <code>logical</code>, and <code>character</code> length-one vectors. rJava requires these structures to indicate Java <code>double</code>, <code>int</code>, <code>boolean</code>, and <code>String</code> method parameters, respectively. However, if the R vector type is <code>raw</code>, <code>convertToJava()</code> returns an object of class <code>jbyte</code> to notify rJava that the value should be converted to a Java <code>byte</code>.</p>
+<p>If <code>length.one.vector.as.array</code> is <code>FALSE</code> and <code>scalars.as.objects</code> is <code>TRUE</code>, length-one vectors will be converted to so-called <em>boxed</em> scalars. That is, <code>numeric</code>, <code>integer</code>, <code>logical</code>, <code>raw</code>, and <code>character</code> vectors of length one are converted to <code>java.lang.Double</code>, <code>java.lang.Integer</code>, <code>java.lang.Boolean</code>, <code>java.lang.Byte</code>, and <code>java.lang.String</code> values, respectively.</p>
+</div>
+</div>
+<div id="converting-java-objects-to-r-objects" class="section level2">
+<h2>Converting Java Objects to R Objects</h2>
+</div>
+<div id="r-raw-values" class="section level2">
+<h2>R Raw Values</h2>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

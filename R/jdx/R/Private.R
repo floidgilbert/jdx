@@ -32,11 +32,11 @@ EC_WARNING_MISSING_LOGICAL_VALUES <- 0xA0000L
 EC_WARNING_MISSING_RAW_VALUES <- 0xB0000L
 
 # Logical NA cannot be represented in primitive Java boolean types. Logical NA 
-# will be coerced to TRUE in this package. TRUE was chosen for compatibility 
-# with rscala and Rcpp. When logical NAs are coerced to TRUE, a warning is 
-# thrown. Note that Java's null values in java.lang.Boolean boxed types are also
-# coerced with a warning.
-NA_ASSUMPTION_LOGICAL <- TRUE
+# will be coerced to FALSE to align with rJava. TRUE was chosen for
+# compatibility with rscala and Rcpp. When logical NAs are coerced, a warning is
+# thrown. Java null values in java.lang.Boolean boxed types are also coerced
+# with a warning.
+NA_ASSUMPTION_LOGICAL <- FALSE
 MSG_WARNING_MISSING_LOGICAL_VALUES <- sprintf("Missing values encountered during logical (boolean) data coercion have been replaced with '%s'.", NA_ASSUMPTION_LOGICAL)
 
 # Used on the Java side when Java null is found in java.lang.Byte arrays. null
