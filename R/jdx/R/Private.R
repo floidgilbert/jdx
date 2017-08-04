@@ -3,11 +3,6 @@
 #///consider implementing major and minor indexing for arrays.
 # Constants ---------------------------------------------------------------
 
-# Array order constants. See documentation for explanations.
-AO_ROW_MAJOR = "row-major"
-AO_ROW_MAJOR_JAVA = "row-major-java"
-AO_COLUMN_MAJOR = "column-major"
-
 # Type codes used to determine return value types coming from Java. While
 # handling each return type explicitly is cumbersome, but it is required to
 # reduce expensive calls (like class inference and casting) via rJava. These

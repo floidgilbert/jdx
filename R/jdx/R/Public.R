@@ -5,7 +5,7 @@
 #///also note that convertToJava and convertToR are not exactly inverses in every case because of the behavior of Java. Sometimes scalars are returned as R objects because that's what rJava wants.
 #///you've forgotten to validate the parameters in every case here.
 #' @export
-convertToJava <- function(value, length.one.vector.as.array = FALSE, coerce.factors = TRUE, array.order = "row-major", data.frame.row.major = TRUE, scalars.as.objects = FALSE) {
+convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
   
   # The class AsIs (set via the function I()) can be used to indicate that
   # length one vectors/arrays/factors should be converted to arrays, not
@@ -211,7 +211,7 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, coerce.fact
           jdx.utility
           , "Ljava/util/List;"
           , "createList"
-          , rJava::.jarray(lapply(value, convertToJava, length.one.vector.as.array = length.one.vector.as.array, coerce.factors = coerce.factors, array.order = array.order, data.frame.row.major = data.frame.row.major, scalars.as.objects = TRUE))
+          , rJava::.jarray(lapply(value, convertToJava, length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = TRUE, array.order = array.order, data.frame.row.major = data.frame.row.major, coerce.factors = coerce.factors))
           , check = FALSE
         )
       )
@@ -221,7 +221,7 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, coerce.fact
         , "Ljava/util/Map;"
         , "createMap"
         , rJava::.jarray(names(value))
-        , rJava::.jarray(lapply(value, convertToJava, length.one.vector.as.array = length.one.vector.as.array, coerce.factors = coerce.factors, array.order = array.order, data.frame.row.major = data.frame.row.major, scalars.as.objects = TRUE))
+        , rJava::.jarray(lapply(value, convertToJava, length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = TRUE, array.order = array.order, data.frame.row.major = data.frame.row.major, coerce.factors = coerce.factors))
         , check = FALSE
       )
     )
@@ -234,8 +234,33 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, coerce.fact
 #///this is not thread-safe, correct? if you want something thread-safe, probably use low-level interface.
 #' @export
 convertToR <- function(value, strings.as.factors = NULL, array.order = "row-major") {
+  
+  
+  private$ARRAY_ORDER_COLUMN_MAJOR <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "COLUMN_MAJOR")
+  private$ARRAY_ORDER_ROW_MAJOR <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR")
+  private$ARRAY_ORDER_ROW_MAJOR_JAVA <- rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR_JAVA")
+  
+  
+  order <- rJava::.jcall(private$controller, "Lorg/fgilbert/jdx/JavaToR$ArrayOrder;", "getArrayOrder")
+  if (rJava::.jequals(order, private$ARRAY_ORDER_ROW_MAJOR))
+    return("row-major")
+  if (rJava::.jequals(order, private$ARRAY_ORDER_ROW_MAJOR_JAVA))
+    return("row-major-java")
+  "column-major"
+  
+
+  order <- switch (value,
+    `row-major` = private$ARRAY_ORDER_ROW_MAJOR
+    , `row-major-java` = private$ARRAY_ORDER_ROW_MAJOR_JAVA
+    , `column-major` = private$ARRAY_ORDER_COLUMN_MAJOR
+    , ... = NULL
+  )
+  
+    
+  
+  
   #///array.order/// validate it and pass it to j2r.initialize
-  composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE))
+  composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE), array.order)
   data.code <- processCompositeDataCode(jdx.j2r, composite.data.code)
   convertToRlowLevel(jdx.j2r, data.code, strings.as.factors, array.order)
 }
@@ -251,6 +276,17 @@ getJavaClassName <- function(value) {
 # Java integrations (such as the jsr223 project) to avoid expensive rJava calls 
 # during conversion that create new objects or obtain references to objects
 # (non-primitives).
+
+#' @export
+arrayOrderToString <- function(value) {
+  if (rJava::.jequals(value, array.order.values$`row-major`))
+    return("row-major")
+  if (rJava::.jequals(value, array.order.values$`column-major`))
+    return("column-major")
+  if (rJava::.jequals(value, array.order.values$`row-major-java`))
+    return("row-major-java")
+  NULL
+}
 
 # IMPORTANT: Any logic added to convertToRlowLevel must usually be repeated in
 # the nested function createList.
@@ -367,7 +403,7 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       return(rJava::.jcall(j2r, "Z", "getValueBoolean", check = FALSE))
     if (data.code[1] == TC_RAW) {
       # Convert to raw manually. Unfortunately, rJava returns an integer vector 
-      # in this scenario. This is understanding because Java bytes range from 
+      # in this scenario. This is understandable because Java bytes range from 
       # -128 to 127 whereas R raw values range from 0 to 255. However, this 
       # behavior is inconsistent because rJava converts byte arrays to raw 
       # values without hesitation and bitwise. So Java -1 maps to R 0xff. So,
@@ -435,14 +471,10 @@ createJavaToRobject <- function() {
   rJava::.jnew("org/fgilbert/jdx/JavaToR")
 }
 
-# TC*, SC*, and EC* constants are used with processCompositeDataCode
-# and convertToRlowLevel.
 #' @export
-javaToRconstants <- function() {
-  l <- list(
-    AO_ROW_MAJOR = "row-major"
-    , AO_ROW_MAJOR_JAVA = "row-major-java"
-    , AO_COLUMN_MAJOR = "column-major"
+jdxConstants <- function() {
+  list(
+    ARRAY_ORDER = array.order.values
     
     , EC_NONE = EC_NONE
     , EC_EXCEPTION = EC_EXCEPTION

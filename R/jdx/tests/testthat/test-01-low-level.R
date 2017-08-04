@@ -19,9 +19,9 @@ test_that(
 )
 
 test_that(
-  "javaToRconstants"
+  "jdxConstants"
   , {
-    z <- javaToRconstants()
+    z <- jdxConstants()
     expect_identical(class(z), "list")
     expect_gt(length(z), 1)
     expect_gt(length(names(z)), 1)
