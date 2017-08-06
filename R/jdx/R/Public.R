@@ -36,18 +36,21 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
     # At this point, we know to create a scalar.
     if (!scalars.as.objects) {
       # From the rJava::.jbyte documentation: ".jbyte is used when a scalar byte
-      # is to be passed ot Java." In other words, a raw vector of length
+      # is to be passed to Java." In other words, a raw vector of length
       # one will not be interpreted as a scalar byte value by rJava unless it is 
       # wrapped in a special class. This will be non-intuitive for the user when
       # length.one.vector.as.array = FALSE and scalars.as.objects = FALSE because 
       # the returned value will not be the same as the value passed in, yet it is 
       # not a Java object; it is an R object wrapped in a custom class. By contrast,
       # when length.one.vector.as.array = FALSE and scalars.as.objects = TRUE, the
-      # returned value is a reference to a java.lang.Byte object. #///document
+      # returned value is a reference to a java.lang.Byte object.
       if (is.raw(value))
         return(rJava::.jbyte(value))
       return(value)
     }
+    # The Java documentation suggests using the 'valueOf' static method instead
+    # of creating new instances for performance reasons. But .jcall() is slower
+    # than .jnew() in this case.
     if (is.double(value))
       return(rJava::.jnew("java/lang/Double", value, check = FALSE))
     if (is.integer(value))
