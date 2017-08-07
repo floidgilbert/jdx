@@ -21,7 +21,7 @@ load(rdata.tables)
 The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbanek's excellent [rJava](https://cran.r-project.org/package=rJava) to simplify and extend data exchange between R and Java. Together, jdx and rJava provide a potent low-level interface for the Java platform. 
 The jdx package was originally developed to provide data exchange functionality for [jsr223](https://cran.r-project.org/package=jsr223), the high-level scripting interface for the Java platform. We provide jdx to developers who want to extend existing interfaces to Java. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.
 
-The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, matrices, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java objects implementing common Java classes are converted to R vectors, matrices, n-dimensional arrays, data frames, and lists. Several options are available for data conversion such as row-major vs. column-major ordering for arrays and data frames.
+The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, matrices, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java objects implementing common Java classes are converted to R vectors, matrices, n-dimensional arrays, data frames, and lists. Several options are available for data conversion including row-major vs. column-major ordering for arrays and data frames.
 
 For sites that plan on designing and distributing packages that depend on jdx, it may be helpful to know that the jdx package does not use or load rJava's companion package JRI (the Java/R Interface).
 
@@ -74,7 +74,7 @@ convertToJava(
 
 The parameters `length.one.vector.as.array` and `scalars.as.objects` control if and how length one vectors are converted to Java scalars. The parameter `array.order` affects the index order of matrices and n-dimensional arrays. The parameter `data.frame.row.major` specifies whether data frames are converted using row-major or column-major order. Finally, `coerce.factors` determines whether an attempt should be made to coerce the character vector backing factors to `double`, `int`, or `boolean` Java arrays. The following sections cover each of these topics in detail as well as data conversion rules and behaviors.
 
-### Vectors of Length One
+### R Vectors of Length One
 
 The parameters `length.one.vector.as.array` and `scalars.as.objects` control how R vectors of length one are converted to Java objects. If `length.one.vector.as.array` is `TRUE`, length-one vectors are converted to Java arrays. This is equivalent to passing an R vector to `rJava::.jarray`. The "As Is" R function, `base::I()`, can also be used to indicate that a length-one vector should be converted to a Java array. For example, `convertToJava(I(1))` produces a Java array even though the default value for `length.one.vector.as.array` is `FALSE`. The `I()` function has no effect for other R object types.
 
@@ -120,7 +120,7 @@ pander::pander(
 )
 ```
 
-### Vectors, One-dimensional Arrays, and One-dimensional Tables
+### R Vectors, One-dimensional Arrays, and One-dimensional Tables
 
 The `convertToJava()` functionality for vectors, one-dimensional arrays, and one-dimensional tables is summarized in the table below. In this case, `convertToJava()` is the same as `rJava::.jarray()` with one exception: `convertToJava()` raises a warning when the `logical` value `NA` is replaced with `FALSE`.
 
@@ -140,13 +140,13 @@ pander::pander(
 )
 ```
 
-### Factors
+### R Factors
 
 R factors are comprised of a `character` vector of levels and an `integer` vector of indexes that reference the levels. For example, if the `integer` vector `5:7` is converted to a factor, the levels will be `c("5", "6", "7")` and the indexes will be `c(1, 2, 3)`. The `coerce.factors` parameter for `convertToJava()` determines how the factor levels are handled when converting the factor to a vector before it's converted to a Java array. If `coerce.factors = TRUE` (the default), an attempt is made to coerce the factor levels to `integer`, `numeric`, or `logical` values. If coercion fails, the `character` levels are used. If `coerce.factors = FALSE`, the `character` levels are always used. Once the factor is converted to a vector, the conversion to Java follows the same mapping rules as vectors.
 
 `NA` values present in factors are preserved. However, the `character` value `"NA"` will not be coerced to `NA`.
 
-### Matrices and N-dimensional Arrays
+### R Matrices and N-dimensional Arrays
 
 The jdx package supports data exchange for n-dimensional arrays (matrices are two-dimensional arrays). Three array index ordering schemes are available via the `converToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'row-major-java'`. Before describing these schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion. R n-dimensional arrays, on the other hand, are stored in memory as a vector and the data is retrieved in the appropriate order using so-called indexing arithmetic.
 
@@ -176,18 +176,33 @@ pander::pander(
 )
 ```
 
-## Data Frames
+### R Data Frames
 
+The `data.frame.row.major` parameter of the `convertToJava()` function specifies whether data frames are converted using row-major or column-major form. When `data.frame.row.major = TRUE` (the default), the result is an `ArrayList<LinkedHashMap<String, Object>>` object where each map object represents a row in the data frame. The key/value pairs in the map are the names and scalar values associated with each field in the row. The row values follow the same conversion rules as vectors of length one when `length.one.vector.as.array = FALSE` and `scalars.as.objects = TRUE`.
 
+When `data.frame.row.major = FALSE`, `convertToJava()` creates a `LinkedHashMap<String, Object>` object. In this case, the key/value pairs represent column names and data. The column data are converted to primitive Java arrays using the same rules as R vectors.
 
-## List and Environments
+**NOTE:** The jdx package uses row-major ordering by default because of its popularity. However, column-major structures are much faster to create and they often present a performance advantage for calculations.
 
+### R Lists and Environments
 
-
+The jdx package supports data exchange for lists, named lists, nested lists (lists containing other lists), and environments. The `convertToJava()` function converts R lists to Java `ArrayList<Object>` objects. It converts named lists and `environment` objects to Java `LinkedHashMap<String, Object>` objects.
 
 ## Converting Java Objects to R Objects
 
+///talk about how supporting collection and maps gets us everything. Primitives, boxed, and BigInt...
 
+### Java Scalars
+
+### Java One-dimensional Arrays
+
+### Java N-dimensional Rectangular Arrays
+
+### Java Ragged Arrays
+
+### Java Maps (java.util.Map Interface)
+
+### Java Collections (java.util.Collection)
 
 ## R raw Values and Java byte Values # {#R_raw_Java_byte}
 
