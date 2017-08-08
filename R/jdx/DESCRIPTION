@@ -1,6 +1,6 @@
 Package: jdx
 Type: Package
-Title: Extended Java Data Exchange for R and rJava
+Title: Java Data Exchange for R and rJava
 Version: 0.1-0
 Date: 2017-05-30
 Authors@R: c(person(given="Floid R.", family="Gilbert", role=c("aut","cre"), email="floid.r.gilbert@gmail.com"), person(given="David B.", family="Dahl", role=c("aut"), email="dahl@stat.byu.edu"))

@@ -5,7 +5,7 @@
 \docType{package}
 
 \title{
-Extended Java Data Exchange for R and rJava
+Java Data Exchange for R and rJava
 }
 
 \description{
