@@ -9,5 +9,6 @@
       , `row-major` = rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR")
       , `row-major-java` = rJava::.jfield("org.fgilbert.jdx.JavaToR$ArrayOrder", sig = NULL, "ROW_MAJOR_JAVA")
     )
-    , inherits = TRUE)
+    , inherits = TRUE
+  )
 }

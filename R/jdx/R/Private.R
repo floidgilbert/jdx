@@ -50,6 +50,7 @@ MSG_WARNING_MISSING_RAW_VALUES <- sprintf("Missing values encountered during raw
 # These are Java objects that are initialized during .onLoad. Creating these objects
 # via rJava is slow, so instantiate them only and re-use them to improve
 # performance.
+array.order.values <- NULL;
 jdx.utility <- NULL;
 jdx.j2r <- NULL;
 
