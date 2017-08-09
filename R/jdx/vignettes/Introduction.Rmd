@@ -24,6 +24,8 @@ The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbane
 
 The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, matrices, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java objects implementing common Java classes are converted to R vectors, matrices, n-dimensional arrays, data frames, and lists. Several options are available for data conversion including row-major vs. column-major ordering for arrays and data frames.
 
+The functionality of jdx is similar to the [jsonlite](https://cran.r-project.org/package=jsonlite) package. In contrast to jsonlite, jdx is designed specifically for the Java platform, it provides exact precision for numeric values (because it doesn't convert numbers to text), and it requires less overhead.
+
 For sites that plan on designing and distributing packages that depend on jdx, it may be helpful to know that the jdx package does not use or load rJava's companion package JRI (the Java/R Interface).
 
 **Note**: The jdx package behavior diverges from rJava somewhat for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information.
