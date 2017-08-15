@@ -18,6 +18,12 @@ public class UtilityTest {
 	public void testCreateNdimensionalArrayRowMajorJava() {
 		int max; int[] dimensions; int[] data;
 		
+		/*
+		 * This testing is weak. It is here mainly to step-through
+		 * createNdimensionalArray* functions. The primary unit testing is done
+		 * in jsr223.
+		 */
+		
 		max = 9;
 		data = new int[max];
 		for (int i = 0; i < max; i++)
@@ -33,25 +39,34 @@ public class UtilityTest {
 		dimensions = new int[] {2, 3};
 		assertArrayEquals(new int[][] {{1, 2, 3}, {4, 5, 6}}, (int[][]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions));
 
-		data = new int[] {1, 5, 2, 6, 3, 7, 4, 8, 1, 5, 2, 6, 3, 7, 4, 8};
-		dimensions = new int[] {2, 1, 2, 4};
-		assertArrayEquals(
-			new int[][][][] {
-				{
-					{
-						{1, 2, 3, 4}
-						, {5, 6, 7, 8} 
-					}
-				}
-				, {
-					{
-						{1, 2, 3, 4}
-						, {5, 6, 7, 8} 
-					}
-				}
-			}
-			, (int[][][][]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions)
-		);
+		data = new int[] {1, 3, 5, 2, 4, 6};
+		dimensions = new int[] {3, 2};
+		assertArrayEquals(new int[][] {{1, 2}, {3, 4}, {5, 6}}, (int[][]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions));
+
+		data = new int[] {1, 4, 2, 5, 3, 6, 7, 10, 8, 11, 9, 12, 13, 16, 14, 17, 15, 18};
+		dimensions = new int[] {3, 2, 3};
+		Object[] arrayExpected = new int[][][] {{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}, {10, 11, 12}}, {{13, 14, 15}, {16, 17, 18}}};
+		Object[] arrayActual = (int[][][]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions); 
+		assertArrayEquals(arrayExpected, arrayActual);
+
+		data = new int[] {1, 3, 5, 2, 4, 6, 7, 9, 11, 8, 10, 12, 13, 15, 17, 14, 16, 18};
+		dimensions = new int[] {3, 3, 2};
+		arrayExpected = new int[][][] {{{1, 2}, {3, 4}, {5, 6}}, {{7, 8}, {9, 10}, {11, 12}}, {{13, 14}, {15, 16}, {17, 18}}};
+		arrayActual = (Object[]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions); 
+		assertArrayEquals(arrayExpected, arrayActual);
+
+		data = new int[] {1, 4, 2, 5, 3, 6, 7, 10, 8, 11, 9, 12, 13, 16, 14, 17, 15, 18, 1, 4, 2, 5, 3, 6, 7, 10, 8, 11, 9, 12, 13, 16, 14, 17, 15, 18};
+		dimensions = new int[] {2, 3, 2, 3};
+		arrayExpected = new int[][][][] {{{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}, {10, 11, 12}}, {{13, 14, 15}, {16, 17, 18}}}, {{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}, {10, 11, 12}}, {{13, 14, 15}, {16, 17, 18}}}};
+		arrayActual = (Object[]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions); 
+		assertArrayEquals(arrayExpected, arrayActual);
+
+		data = new int[] {1, 3, 5, 2, 4, 6, 7, 9, 11, 8, 10, 12, 13, 15, 17, 14, 16, 18, 1, 3, 5, 2, 4, 6, 7, 9, 11, 8, 10, 12, 13, 15, 17, 14, 16, 18};
+		dimensions = new int[] {2, 3, 3, 2};
+		arrayExpected = new int[][][][] {{{{1, 2}, {3, 4}, {5, 6}}, {{7, 8}, {9, 10}, {11, 12}}, {{13, 14}, {15, 16}, {17, 18}}}, {{{1, 2}, {3, 4}, {5, 6}}, {{7, 8}, {9, 10}, {11, 12}}, {{13, 14}, {15, 16}, {17, 18}}}};
+		arrayActual = (Object[]) Utility.createNdimensionalArrayRowMajorJava(data, dimensions); 
+		assertArrayEquals(arrayExpected, arrayActual);
+
 	}
 	
 	@Test

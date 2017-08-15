@@ -1,6 +1,9 @@
 #///mention jsr223 in documentation. tell them to use it instead of rJava.///
 #///write up release notes...what to do. download latest R build, build both jar files, build R, run tests, etc.
 #///consider implementing major and minor indexing for arrays.
+#///devtools::install(build_vignettes = TRUE); library(jdx); ?jdx
+#///add the array tests in temp to unit testing and add jsonlite to recommends? no. just leave in outer testing folder. but do that after you have added zero-length stuff.
+#///still need to handle arrays coming from jdx to R.
 # Constants ---------------------------------------------------------------
 
 # Type codes used to determine return value types coming from Java. While
@@ -57,34 +60,6 @@ jdx.j2r <- NULL;
 
 # Functions ---------------------------------------------------------------
 
-# This function bypasses a bug in rJava relating to the last line of code in the
-# .jarray function. It fails to encode the JNI class for a String[][] array
-# properly. This bug has been reported to the rJava team. ///remove this
-# function when rJava is updated.
-.jarrayTemp <- function (x, contents.class = NULL, dispatch = FALSE) {
-  if (rJava:::isJavaArray(x))
-    return(rJava:::newArray(x, simplify = FALSE))
-  dim <- if (inherits(x, "jobjRef")) {
-    x <- list(x)
-    1L
-  } else rJava:::getDim(x)
-  array <- .Call(rJava:::RcreateArray, x, contents.class)
-  if (!dispatch)
-    return(array)
-  if (is.list(x)) {
-    rJava:::newArray(array, simplify = FALSE)
-  } else {
-    if (length(dim) == 1L) {
-      rJava:::new("jrectRef", jobj = array@jobj, jsig = array@jsig, jclass = array@jclass, dimension = dim)
-    } else {
-      builder <- rJava::.jnew("RectangularArrayBuilder", rJava::.jcast(array), dim)
-      clazz <- rJava::.jcall(builder, "Ljava/lang/String;", "getArrayClassName")
-      r <- .External("RcallMethod", builder@jobj, "Ljava/lang/Object;", "getArray", PACKAGE = "rJava")
-      rJava:::new("jrectRef", jobj = r, dimension = dim, jclass = rJava:::tojni(clazz), jsig = rJava:::tojni(clazz))
-    }
-  }
-}
-
 allCombinations <- function(value, unique = TRUE) {
   if (!is.atomic(value) || !is.null(dim(value)))
     stop("Only vectors are supported.")
@@ -92,7 +67,7 @@ allCombinations <- function(value, unique = TRUE) {
     value <- unique(value)
   l <- list()
   for (i in 1:length(value)) {
-    l <- c(l, combn(value, i, simplify = FALSE))
+    l <- c(l, utils::combn(value, i, simplify = FALSE))
   }
   l
 }

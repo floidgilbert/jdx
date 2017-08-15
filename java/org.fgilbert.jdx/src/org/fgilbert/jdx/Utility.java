@@ -179,7 +179,7 @@ public class Utility {
 			subarrayCount *= dimensions[i];
 		int rowCount = dimensions[dimensions.length - 2];
 		int columnCount = dimensions[dimensions.length - 1];
-///		int dataOffset = rowCount * columnCount;
+		int matrixIndex = 0;
 		int currentDataIndex = 0;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
 		for (int i = 0; i < subarrayCount; i++) {
@@ -189,10 +189,11 @@ public class Utility {
 			int[] n = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < columnCount; j++)
 				n[j] = data[currentDataIndex + rowCount * j];
-			if ((i + 1) % rowCount != 0) {
-				currentDataIndex++;
+			if ((i + 1) % rowCount == 0) {
+				matrixIndex++;
+				currentDataIndex = matrixIndex * rowCount * columnCount;
 			} else {
-				currentDataIndex = currentDataIndex - rowCount + rowCount * columnCount;
+				currentDataIndex++;
 			}
 			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
 				if (currentSubarrayIndex[j] < dimensions[j] - 1) {

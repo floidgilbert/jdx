@@ -3,7 +3,7 @@
 
 #///record the fact that when scalars.as.objects = FALSE, a scalar byte will be returned as rJava::.jbyte(value)
 #///also note that convertToJava and convertToR are not exactly inverses in every case because of the behavior of Java. Sometimes scalars are returned as R objects because that's what rJava wants.
-#///you've forgotten to validate the parameters in every case here.
+#///you've forgotten to validate the parameters in every case here. probably just validate them in the if/else or select statements.
 #' @export
 convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
   
@@ -83,27 +83,36 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
           , check = TRUE
         )
       )
-    if (array.order == "row-major-java")
+    if (array.order == "column-major")
+      return(
+        rJava::.jcall(
+          jdx.utility
+          , "Ljava/lang/Object;"
+          , "createNdimensionalArrayColumnMajor"
+          , rJava::.jarray(value, dispatch = FALSE)
+          , rev(dim(value))
+          , check = TRUE
+        )
+      )
+    if (array.order == "row-major-java") {
+      dimensions <- rev(dim(value))
+      dimensions.length <- length(dimensions)
+      # Swap row/column dimensions
+      row.count <- dimensions[dimensions.length]
+      dimensions[dimensions.length] <- dimensions[dimensions.length - 1]
+      dimensions[dimensions.length - 1] <- row.count
       return(
         rJava::.jcall(
           jdx.utility
           , "Ljava/lang/Object;"
           , "createNdimensionalArrayRowMajorJava"
           , rJava::.jarray(value, dispatch = FALSE)
-          , dim(value)
+          , dimensions
           , check = TRUE
         )
       )
-    return(
-      rJava::.jcall(
-        jdx.utility
-        , "Ljava/lang/Object;"
-        , "createNdimensionalArrayColumnMajor"
-        , rJava::.jarray(value, dispatch = FALSE)
-        , dim(value)
-        , check = TRUE
-      )
-    )
+    }
+    stop(sprintf("Invalid 'array.order' parameter: '%s'.", array.order))
   }
   
   if (is.factor(value)) {
@@ -244,7 +253,7 @@ convertToR <- function(value, strings.as.factors = NULL, array.order = "row-majo
 
 #' @export
 getJavaClassName <- function(value) {
-  rJava::.jcall(rJava::.jcall(o, "Ljava/lang/Class;", "getClass"), "S", "getName")
+  rJava::.jcall(rJava::.jcall(value, "Ljava/lang/Class;", "getClass"), "S", "getName")
 }
 
 # ConvertToR Low-level Interface ------------------------------------------
