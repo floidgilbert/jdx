@@ -16,6 +16,7 @@ for (i in 0:5) {
   # cat(s1, "\n")
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
+  expect_identical(convertToR(o), as.vector(a))
 }
 
 # Two-dimensional
@@ -30,6 +31,8 @@ for (i in 0:5) {
     # cat(s1, "\n")
     # cat(s2, "\n\n")
     expect_identical(s1, s2)
+    if (i != 0)
+      expect_identical(convertToR(o), a)
   }
 }
 
@@ -46,6 +49,8 @@ for (i in 0:5) {
       # cat(s1, "\n")
       # cat(s2, "\n\n")
       expect_identical(s1, s2)
+      if (i * j != 0)
+        expect_identical(convertToR(o), a)
     }
   }
 }
@@ -64,6 +69,8 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
+        if (i * j * k != 0)
+          expect_identical(convertToR(o), a)
       }
     }
   }
@@ -84,6 +91,7 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
+          expect_identical(convertToR(o), a)
         }
       }
     }

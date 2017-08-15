@@ -447,24 +447,66 @@ public class JavaToR {
 		boolean[] flatArray = new boolean[flatLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = dimensions[dimensions.length - 1];
+		if (subarrayLength == 0)
+			return flatArray;
 		int subarrayCount = flatLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
 		for (int i = 0; i < subarrayCount; i++) {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			boolean[] z = j2r.getValueBooleanArray1d();			
-			for (int j = 0; j < subarrayLength; j++)
-				flatArray[currentFlatArrayIndex + j] = z[j];
-			currentFlatArrayIndex += subarrayLength;
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
+			boolean[] subarray = j2r.getValueBooleanArray1d();			
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
 				}
-				currentSubarrayIndex[j] = 0;
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
 			}
 		}
 		return flatArray;
@@ -477,24 +519,66 @@ public class JavaToR {
 		byte[] flatArray = new byte[flatLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = dimensions[dimensions.length - 1];
+		if (subarrayLength == 0)
+			return flatArray;
 		int subarrayCount = flatLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
 		for (int i = 0; i < subarrayCount; i++) {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			byte[] b = j2r.getValueByteArray1d();			
-			for (int j = 0; j < subarrayLength; j++)
-				flatArray[currentFlatArrayIndex + j] = b[j];
-			currentFlatArrayIndex += subarrayLength;
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
+			byte[] subarray = j2r.getValueByteArray1d();			
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
 				}
-				currentSubarrayIndex[j] = 0;
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
 			}
 		}
 		return flatArray;
@@ -507,54 +591,66 @@ public class JavaToR {
 		double[] flatArray = new double[flatLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = dimensions[dimensions.length - 1];
+		if (subarrayLength == 0)
+			return flatArray;
 		int subarrayCount = flatLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
 		for (int i = 0; i < subarrayCount; i++) {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			double[] d = j2r.getValueDoubleArray1d();			
-			for (int j = 0; j < subarrayLength; j++)
-				flatArray[currentFlatArrayIndex + j] = d[j];
-			currentFlatArrayIndex += subarrayLength;
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
+			double[] subarray = j2r.getValueDoubleArray1d();			
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
 				}
-				currentSubarrayIndex[j] = 0;
-			}
-		}
-		return flatArray;
-	}
-	
-	private String[] coerceFlattenNdimensionalStringArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		String[] flatArray = new String[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			String[] s = j2r.getValueStringArray1d();			
-			for (int j = 0; j < subarrayLength; j++)
-				flatArray[currentFlatArrayIndex + j] = s[j];
-			currentFlatArrayIndex += subarrayLength;
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
 				}
-				currentSubarrayIndex[j] = 0;
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
 			}
 		}
 		return flatArray;
@@ -567,24 +663,138 @@ public class JavaToR {
 		int[] flatArray = new int[flatLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = dimensions[dimensions.length - 1];
+		if (subarrayLength == 0)
+			return flatArray;
 		int subarrayCount = flatLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
 		for (int i = 0; i < subarrayCount; i++) {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			int[] n = j2r.getValueIntArray1d();			
-			for (int j = 0; j < subarrayLength; j++)
-				flatArray[currentFlatArrayIndex + j] = n[j];
-			currentFlatArrayIndex += subarrayLength;
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
+			int[] subarray = j2r.getValueIntArray1d();			
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
 				}
-				currentSubarrayIndex[j] = 0;
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		return flatArray;
+	}
+	
+	private String[] coerceFlattenNdimensionalStringArray(Object array, int[] dimensions) {
+		int flatLength = dimensions[0];
+		for (int i = 1; i < dimensions.length; i++)
+			flatLength *= dimensions[i];
+		String[] flatArray = new String[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = dimensions[dimensions.length - 1];
+		if (subarrayLength == 0)
+			return flatArray;
+		int subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			String[] subarray = j2r.getValueStringArray1d();			
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
 			}
 		}
 		return flatArray;

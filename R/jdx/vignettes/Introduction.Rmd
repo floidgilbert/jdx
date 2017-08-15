@@ -152,6 +152,8 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 ### R Matrices and N-dimensional Arrays # {#r_n_dimensional_arrays}
 
+///talk about zero-length n-dimensional arrays and how R lets you do [0,0,0,1] but Java doesn't, so what to expect. Update JavaToR also.
+
 The jdx package supports data exchange for n-dimensional arrays. (R matrices are two-dimensional arrays.) Several array index ordering schemes are available via the `converToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'row-major-java'`. Before describing these schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion. R n-dimensional arrays, on the other hand, are stored in memory as a vector and the data is retrieved in the appropriate order using indexing arithmetic.
 
 Now we describe the each of the `array-order` options.
