@@ -82,13 +82,116 @@ public class Utility {
 	
 	/*
 	 * Creates an n-dimensional array from a 1-dimensional array (vector) where
-	 * the right-most index changes the fastest. In a three-dimensional
-	 * structure, this would be [matrix, column, row].
+	 * the right-most index changes the fastest:
+	 * [n]...[cube][matrix][column][row].
 	 * 
 	 * IMPORTANT: This method does not validate the incoming data.
 	 */
-	///test both/all n-dim array functions with single dimensional array
-	///create methods for the other data types after testing
+	public static Object createNdimensionalArrayColumnMajor(boolean[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(boolean.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			boolean[] subarray = (boolean[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				subarray[j] = data[currentDataIndex++];
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) where
+	 * the right-most index changes the fastest:
+	 * [n]...[cube][matrix][column][row].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayColumnMajor(byte[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(byte.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			byte[] subarray = (byte[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				subarray[j] = data[currentDataIndex++];
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) where
+	 * the right-most index changes the fastest:
+	 * [n]...[cube][matrix][column][row].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayColumnMajor(double[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(double.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			double[] subarray = (double[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				subarray[j] = data[currentDataIndex++];
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) where
+	 * the right-most index changes the fastest:
+	 * [n]...[cube][matrix][column][row].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
 	public static Object createNdimensionalArrayColumnMajor(int[] data, int[] dimensions) {
 		if (dimensions.length == 1)
 			return Arrays.copyOfRange(data, 0, dimensions[0]);
@@ -103,9 +206,44 @@ public class Utility {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
-			int[] n = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				n[j] = data[currentDataIndex++];
+				subarray[j] = data[currentDataIndex++];
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) where
+	 * the right-most index changes the fastest:
+	 * [n]...[cube][matrix][column][row].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayColumnMajor(String[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(String.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			String[] subarray = (String[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				subarray[j] = data[currentDataIndex++];
 			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
 				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
 					currentSubarrayIndex[j]++;
@@ -119,13 +257,131 @@ public class Utility {
 	
 	/*
 	 * Creates an n-dimensional array from a 1-dimensional array (vector) using
-	 * R's indexing scheme: the left-most index changes the fastest. In a
-	 * three-dimensional structure, this is [row, column, matrix].
+	 * R's indexing scheme (the left-most index changes the fastest). That is
+	 * [row][column][matrix][cube]...[n].
 	 * 
 	 * IMPORTANT: This method does not validate the incoming data.
 	 */
-	///test both/all n-dim array functions with single dimensional array
-	///create methods for the other data types after testing
+	public static Object createNdimensionalArrayRowMajor(boolean[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(boolean.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			boolean[] subarray = (boolean[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				/*
+				 *  The offset is the same as subarrayCount because of the way the data structure fills
+				 *  to mimic R's indexing scheme. Step through it to see how it works.
+				 */
+				subarray[j] = data[currentDataIndex + subarrayCount * j];
+			currentDataIndex++; 
+			for (int j = 0; j < currentSubarrayIndex.length; j++) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) using
+	 * R's indexing scheme (the left-most index changes the fastest). That is
+	 * [row][column][matrix][cube]...[n].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajor(byte[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(byte.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			byte[] subarray = (byte[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				/*
+				 *  The offset is the same as subarrayCount because of the way the data structure fills
+				 *  to mimic R's indexing scheme. Step through it to see how it works.
+				 */
+				subarray[j] = data[currentDataIndex + subarrayCount * j];
+			currentDataIndex++; 
+			for (int j = 0; j < currentSubarrayIndex.length; j++) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) using
+	 * R's indexing scheme (the left-most index changes the fastest). That is
+	 * [row][column][matrix][cube]...[n].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajor(double[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(double.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			double[] subarray = (double[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				/*
+				 *  The offset is the same as subarrayCount because of the way the data structure fills
+				 *  to mimic R's indexing scheme. Step through it to see how it works.
+				 */
+				subarray[j] = data[currentDataIndex + subarrayCount * j];
+			currentDataIndex++; 
+			for (int j = 0; j < currentSubarrayIndex.length; j++) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) using
+	 * R's indexing scheme (the left-most index changes the fastest). That is
+	 * [row][column][matrix][cube]...[n].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
 	public static Object createNdimensionalArrayRowMajor(int[] data, int[] dimensions) {
 		if (dimensions.length == 1)
 			return Arrays.copyOfRange(data, 0, dimensions[0]);
@@ -140,13 +396,53 @@ public class Utility {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
-			int[] n = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
 				/*
 				 *  The offset is the same as subarrayCount because of the way the data structure fills
 				 *  to mimic R's indexing scheme. Step through it to see how it works.
 				 */
-				n[j] = data[currentDataIndex + subarrayCount * j];
+				subarray[j] = data[currentDataIndex + subarrayCount * j];
+			currentDataIndex++; 
+			for (int j = 0; j < currentSubarrayIndex.length; j++) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector) using
+	 * R's indexing scheme (the left-most index changes the fastest). That is
+	 * [row][column][matrix][cube]...[n].
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajor(String[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(String.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int subarrayLength = dimensions[dimensions.length - 1];
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			String[] subarray = (String[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < subarrayLength; j++)
+				/*
+				 *  The offset is the same as subarrayCount because of the way the data structure fills
+				 *  to mimic R's indexing scheme. Step through it to see how it works.
+				 */
+				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {
 				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
@@ -162,14 +458,143 @@ public class Utility {
 	/*
 	 * Creates an n-dimensional array from a 1-dimensional array (vector)
 	 * similar to the column-major scheme except that row and column indices are
-	 * switched at the matrix level. In a three-dimensional setting, this is
-	 * [matrix, row, column]. This would be the row-major structure familiar to
-	 * most Java programmers.
+	 * switched at the matrix level: [n]...[cube][matrix][row][column]. This
+	 * would be the row-major structure familiar to most Java programmers.
 	 * 
 	 * IMPORTANT: This method does not validate the incoming data.
 	 */
-	///test both/all n-dim array functions with single dimensional array
-	///create methods for the other data types after testing
+	public static Object createNdimensionalArrayRowMajorJava(boolean[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(boolean.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			boolean[] subarray = (boolean[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < columnCount; j++)
+				subarray[j] = data[currentDataIndex + rowCount * j];
+			if ((i + 1) % rowCount == 0) {
+				matrixIndex++;
+				currentDataIndex = matrixIndex * rowCount * columnCount;
+			} else {
+				currentDataIndex++;
+			}
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector)
+	 * similar to the column-major scheme except that row and column indices are
+	 * switched at the matrix level: [n]...[cube][matrix][row][column]. This
+	 * would be the row-major structure familiar to most Java programmers.
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajorJava(byte[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(byte.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			byte[] subarray = (byte[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < columnCount; j++)
+				subarray[j] = data[currentDataIndex + rowCount * j];
+			if ((i + 1) % rowCount == 0) {
+				matrixIndex++;
+				currentDataIndex = matrixIndex * rowCount * columnCount;
+			} else {
+				currentDataIndex++;
+			}
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector)
+	 * similar to the column-major scheme except that row and column indices are
+	 * switched at the matrix level: [n]...[cube][matrix][row][column]. This
+	 * would be the row-major structure familiar to most Java programmers.
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajorJava(double[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(double.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			double[] subarray = (double[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < columnCount; j++)
+				subarray[j] = data[currentDataIndex + rowCount * j];
+			if ((i + 1) % rowCount == 0) {
+				matrixIndex++;
+				currentDataIndex = matrixIndex * rowCount * columnCount;
+			} else {
+				currentDataIndex++;
+			}
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector)
+	 * similar to the column-major scheme except that row and column indices are
+	 * switched at the matrix level: [n]...[cube][matrix][row][column]. This
+	 * would be the row-major structure familiar to most Java programmers.
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
 	public static Object createNdimensionalArrayRowMajorJava(int[] data, int[] dimensions) {
 		if (dimensions.length == 1)
 			return Arrays.copyOfRange(data, 0, dimensions[0]);
@@ -186,9 +611,53 @@ public class Utility {
 			Object o = array;
 			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
 				o = Array.get(o, currentSubarrayIndex[j]);
-			int[] n = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < columnCount; j++)
-				n[j] = data[currentDataIndex + rowCount * j];
+				subarray[j] = data[currentDataIndex + rowCount * j];
+			if ((i + 1) % rowCount == 0) {
+				matrixIndex++;
+				currentDataIndex = matrixIndex * rowCount * columnCount;
+			} else {
+				currentDataIndex++;
+			}
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
+				}
+				currentSubarrayIndex[j] = 0;
+			}
+		}
+		return array;
+	}
+	
+	/*
+	 * Creates an n-dimensional array from a 1-dimensional array (vector)
+	 * similar to the column-major scheme except that row and column indices are
+	 * switched at the matrix level: [n]...[cube][matrix][row][column]. This
+	 * would be the row-major structure familiar to most Java programmers.
+	 * 
+	 * IMPORTANT: This method does not validate the incoming data.
+	 */
+	public static Object createNdimensionalArrayRowMajorJava(String[] data, int[] dimensions) {
+		if (dimensions.length == 1)
+			return Arrays.copyOfRange(data, 0, dimensions[0]);
+		Object array = (Object[]) Array.newInstance(String.class, dimensions);
+		int subarrayCount = dimensions[0];
+		for (int i = 1; i < dimensions.length - 1; i++)
+			subarrayCount *= dimensions[i];
+		int rowCount = dimensions[dimensions.length - 2];
+		int columnCount = dimensions[dimensions.length - 1];
+		int matrixIndex = 0;
+		int currentDataIndex = 0;
+		int[] currentSubarrayIndex = new int[dimensions.length - 1];
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = array;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			String[] subarray = (String[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+			for (int j = 0; j < columnCount; j++)
+				subarray[j] = data[currentDataIndex + rowCount * j];
 			if ((i + 1) % rowCount == 0) {
 				matrixIndex++;
 				currentDataIndex = matrixIndex * rowCount * columnCount;
