@@ -1,5 +1,4 @@
 # Use jsonlite to ensure multi-dimensional arrays are converted to Java correctly.
-#///add tests for other direction...
 
 # Initialize --------------------------------------------------------------
 
@@ -21,6 +20,7 @@ for (i in 0:5) {
   # cat(s1, "\n")
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
+  expect_identical(convertToR(o), as.vector(a))
 }
 
 # Two-dimensional
@@ -36,6 +36,11 @@ for (i in 0:5) {
     # cat(s1, "\n")
     # cat(s2, "\n\n")
     expect_identical(s1, s2)
+    if (i == 0) {
+      expect_identical(convertToR(o), array(character(0), c(0, 0)))
+    } else {
+      expect_identical(convertToR(o), a)
+    }
   }
 }
 
@@ -53,6 +58,13 @@ for (i in 0:5) {
       # cat(s1, "\n")
       # cat(s2, "\n\n")
       expect_identical(s1, s2)
+      if (i == 0) {
+        expect_identical(convertToR(o), array(character(0), c(0, 0, 0)))
+      } else if (i > 0 & j == 0) {
+        expect_identical(convertToR(o), array(character(0), c(i, 0, 0)))
+      } else {
+        expect_identical(convertToR(o), a)
+      }
     }
   }
 }
@@ -72,10 +84,22 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
+        if (i * j * k != 0)
+          expect_identical(convertToR(o), a)
       }
     }
   }
 }
+a <- array("a", c(1, 1, 0, 0))
+expect_identical(convertToR(convertToJava(a)), a)
+a <- array("a", c(1, 1, 1, 0))
+expect_identical(convertToR(convertToJava(a)), a)
+a <- array("a", c(1, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 0, 0, 0)))
+a <- array("a", c(1, 0, 0, 1))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 0, 0, 0)))
+a <- array("a", c(1, 1, 0, 1))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 1, 0, 0)))
 
 # Five-dimensional
 for (i in 0:5) {
@@ -93,11 +117,25 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
+          if (i * j * k * l != 0)
+            expect_identical(convertToR(o), a)
         }
       }
     }
   }
 }
+a <- array("a", c(1, 1, 0, 0, 0))
+expect_identical(convertToR(convertToJava(a)), a)
+a <- array("a", c(1, 1, 1, 0, 0))
+expect_identical(convertToR(convertToJava(a)), a)
+a <- array("a", c(1, 1, 1, 1, 0))
+expect_identical(convertToR(convertToJava(a)), a)
+a <- array("a", c(1, 0, 1, 1, 0))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 0, 0, 0, 0)))
+a <- array("a", c(1, 0, 0, 1, 0))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 0, 0, 0, 0)))
+a <- array("a", c(1, 1, 0, 1, 0))
+expect_identical(convertToR(convertToJava(a)), array("a", c(1, 1, 0, 0, 0)))
 
 
 # Column-major ------------------------------------------------------------
@@ -114,6 +152,7 @@ for (i in 0:5) {
   # cat(s1, "\n")
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
+  expect_identical(convertToR(o, array.order = "column-major"), as.vector(a))
 }
 
 # Two-dimensional
@@ -129,6 +168,11 @@ for (i in 0:5) {
     # cat(s1, "\n")
     # cat(s2, "\n\n")
     expect_identical(s1, s2)
+    if (j == 0) {
+      expect_identical(convertToR(o, array.order = "column-major"), array(character(0), c(0, 0)))
+    } else {
+      expect_identical(convertToR(o, array.order = "column-major"), a)
+    }
   }
 }
 
@@ -146,6 +190,13 @@ for (i in 0:5) {
       # cat(s1, "\n")
       # cat(s2, "\n\n")
       expect_identical(s1, s2)
+      if (k == 0) {
+        expect_identical(convertToR(o, array.order = "column-major"), array(character(0), c(0, 0, 0)))
+      } else if (k > 0 & j == 0) {
+        expect_identical(convertToR(o, array.order = "column-major"), array(character(0), c(0, 0, k)))
+      } else {
+        expect_identical(convertToR(o, array.order = "column-major"), a)
+      }
     }
   }
 }
@@ -165,10 +216,22 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
+        if (j * k * l != 0)
+          expect_identical(convertToR(o, array.order = "column-major"), a)
       }
     }
   }
 }
+a <- array("a", c(0, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), a)
+a <- array("a", c(0, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), a)
+a <- array("a", c(1, 1, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 0, 1)))
+a <- array("a", c(1, 0, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 0, 1)))
+a <- array("a", c(1, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 1, 1)))
 
 # Five-dimensional
 for (i in 0:5) {
@@ -186,11 +249,25 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
+          if (j * k * l * m != 0)
+            expect_identical(convertToR(o, array.order = "column-major"), a)
         }
       }
     }
   }
 }
+a <- array("a", c(0, 0, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), a)
+a <- array("a", c(0, 0, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), a)
+a <- array("a", c(0, 1, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), a)
+a <- array("a", c(0, 1, 1, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 0, 0, 1)))
+a <- array("a", c(0, 1, 0, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 0, 0, 1)))
+a <- array("a", c(0, 1, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "column-major"), array.order = "column-major"), array("a", c(0, 0, 0, 1, 1)))
 
 
 
@@ -208,6 +285,7 @@ for (i in 0:5) {
   # cat(s1, "\n")
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
+  expect_identical(convertToR(o, array.order = "row-major-java"), as.vector(a))
 }
 
 # Two-dimensional
@@ -223,6 +301,11 @@ for (i in 0:5) {
     # cat(s1, "\n")
     # cat(s2, "\n\n")
     expect_identical(s1, s2)
+    if (i == 0) {
+      expect_identical(convertToR(o, array.order = "row-major-java"), array(character(0), c(0, 0)))
+    } else {
+      expect_identical(convertToR(o, array.order = "row-major-java"), a)
+    }
   }
 }
 
@@ -232,7 +315,7 @@ for (i in 0:5) {
   for (j in 0:5) {
     for (k in 0:5) {
       a <- array(as.character(1:(i * j * k)), c(i, j, k))
-      b <- array(0L, c(j, i, k))
+      b <- array("a", c(j, i, k))
       if (length(b)) {
         for (q in 1:k)
           b[, , q] <- t(a[, , q])
@@ -246,6 +329,13 @@ for (i in 0:5) {
       # cat(s1, "\n")
       # cat(s2, "\n\n")
       expect_identical(s1, s2)
+      if (k == 0) {
+        expect_identical(convertToR(o, array.order = "row-major-java"), array(character(0), c(0, 0, 0)))
+      } else if (k > 0 & i == 0) {
+        expect_identical(convertToR(o, array.order = "row-major-java"), array(character(0), c(0, 0, k)))
+      } else {
+        expect_identical(convertToR(o, array.order = "row-major-java"), a)
+      }
     }
   }
 }
@@ -257,7 +347,7 @@ for (i in 0:5) {
     for (k in 0:5) {
       for (l in 0:5) {
         a <- array(as.character(1:(i * j * k * l)), c(i, j, k, l))
-        b <- array(0L, c(j, i, k, l))
+        b <- array("a", c(j, i, k, l))
         if (length(b)) {
           for (q in 1:k) {
             for (r in 1:l) {
@@ -274,10 +364,22 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
+        if (i * k * l != 0)
+          expect_identical(convertToR(o, array.order = "row-major-java"), a)
       }
     }
   }
 }
+a <- array("a", c(0, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+a <- array("a", c(0, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 1, 1)))
+a <- array("a", c(1, 1, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 0, 1)))
+a <- array("a", c(1, 0, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 0, 1)))
+a <- array("a", c(1, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(1, 0, 1, 1)))
 
 # Five-dimensional
 for (i in 0:5) {
@@ -286,7 +388,7 @@ for (i in 0:5) {
       for (l in 0:5) {
         for (m in 0:5) {
           a <- array(as.character(1:(i * j * k * l * m)), c(i, j, k, l, m))
-          b <- array(0L, c(j, i, k, l, m))
+          b <- array("a", c(j, i, k, l, m))
           if (length(b)) {
             for (q in 1:k) {
               for (r in 1:l) {
@@ -304,9 +406,23 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
+          if (i * k * l * m != 0)
+            expect_identical(convertToR(o, array.order = "row-major-java"), a)
         }
       }
     }
   }
 }
+a <- array("a", c(0, 0, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+a <- array("a", c(0, 0, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+a <- array("a", c(0, 1, 1, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 1, 1, 1)))
+a <- array("a", c(0, 1, 1, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 0, 0, 1)))
+a <- array("a", c(0, 1, 0, 0, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 0, 0, 1)))
+a <- array("a", c(0, 1, 0, 1, 1))
+expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array("a", c(0, 0, 0, 1, 1)))
 

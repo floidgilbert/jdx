@@ -441,368 +441,6 @@ public class JavaToR {
 		}
 		return b;
 	}
-
-	private boolean[] coerceFlattenNdimensionalBooleanArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		boolean[] flatArray = new boolean[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		if (subarrayLength == 0)
-			return flatArray;
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
-		int rowCount = dimensions[dimensions.length - 2];
-		int columnCount = dimensions[dimensions.length - 1];
-		int matrixIndex = 0;
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			this.rDataExceptionCode = j2r.rDataExceptionCode; // Catch warning for java.lang.Boolean[] containing nulls
-			boolean[] subarray = j2r.getValueBooleanArray1d();
-			switch (this.arrayOrder) {
-			case ROW_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
-					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
-				currentFlatArrayIndex++; 
-				for (int j = 0; j < currentSubarrayIndex.length; j++) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case COLUMN_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					flatArray[currentFlatArrayIndex++] = subarray[j];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case ROW_MAJOR_JAVA:
-				for (int j = 0; j < columnCount; j++)
-					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
-				if ((i + 1) % rowCount == 0) {
-					matrixIndex++;
-					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
-				} else {
-					currentFlatArrayIndex++;
-				}
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			}
-		}
-		return flatArray;
-	}
-	
-	private byte[] coerceFlattenNdimensionalByteArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		byte[] flatArray = new byte[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		if (subarrayLength == 0)
-			return flatArray;
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
-		int rowCount = dimensions[dimensions.length - 2];
-		int columnCount = dimensions[dimensions.length - 1];
-		int matrixIndex = 0;
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			this.rDataExceptionCode = j2r.rDataExceptionCode; // Catch warning for java.lang.Byte[] containing nulls
-			byte[] subarray = j2r.getValueByteArray1d();			
-			switch (this.arrayOrder) {
-			case ROW_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
-					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
-				currentFlatArrayIndex++; 
-				for (int j = 0; j < currentSubarrayIndex.length; j++) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case COLUMN_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					flatArray[currentFlatArrayIndex++] = subarray[j];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case ROW_MAJOR_JAVA:
-				for (int j = 0; j < columnCount; j++)
-					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
-				if ((i + 1) % rowCount == 0) {
-					matrixIndex++;
-					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
-				} else {
-					currentFlatArrayIndex++;
-				}
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			}
-		}
-		return flatArray;
-	}
-	
-	private double[] coerceFlattenNdimensionalDoubleArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		double[] flatArray = new double[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		if (subarrayLength == 0)
-			return flatArray;
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
-		int rowCount = dimensions[dimensions.length - 2];
-		int columnCount = dimensions[dimensions.length - 1];
-		int matrixIndex = 0;
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			double[] subarray = j2r.getValueDoubleArray1d();			
-			switch (this.arrayOrder) {
-			case ROW_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
-					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
-				currentFlatArrayIndex++; 
-				for (int j = 0; j < currentSubarrayIndex.length; j++) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case COLUMN_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					flatArray[currentFlatArrayIndex++] = subarray[j];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case ROW_MAJOR_JAVA:
-				for (int j = 0; j < columnCount; j++)
-					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
-				if ((i + 1) % rowCount == 0) {
-					matrixIndex++;
-					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
-				} else {
-					currentFlatArrayIndex++;
-				}
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			}
-		}
-		return flatArray;
-	}
-	
-	private int[] coerceFlattenNdimensionalIntArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		int[] flatArray = new int[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		if (subarrayLength == 0)
-			return flatArray;
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
-		int rowCount = dimensions[dimensions.length - 2];
-		int columnCount = dimensions[dimensions.length - 1];
-		int matrixIndex = 0;
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			int[] subarray = j2r.getValueIntArray1d();			
-			switch (this.arrayOrder) {
-			case ROW_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
-					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
-				currentFlatArrayIndex++; 
-				for (int j = 0; j < currentSubarrayIndex.length; j++) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case COLUMN_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					flatArray[currentFlatArrayIndex++] = subarray[j];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case ROW_MAJOR_JAVA:
-				for (int j = 0; j < columnCount; j++)
-					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
-				if ((i + 1) % rowCount == 0) {
-					matrixIndex++;
-					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
-				} else {
-					currentFlatArrayIndex++;
-				}
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			}
-		}
-		return flatArray;
-	}
-	
-	private String[] coerceFlattenNdimensionalStringArray(Object array, int[] dimensions) {
-		int flatLength = dimensions[0];
-		for (int i = 1; i < dimensions.length; i++)
-			flatLength *= dimensions[i];
-		String[] flatArray = new String[flatLength];
-		int currentFlatArrayIndex = 0;
-		int subarrayLength = dimensions[dimensions.length - 1];
-		if (subarrayLength == 0)
-			return flatArray;
-		int subarrayCount = flatLength / subarrayLength;
-		int[] currentSubarrayIndex = new int[dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
-		int rowCount = dimensions[dimensions.length - 2];
-		int columnCount = dimensions[dimensions.length - 1];
-		int matrixIndex = 0;
-		for (int i = 0; i < subarrayCount; i++) {
-			Object o = array;
-			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-				o = Array.get(o, currentSubarrayIndex[j]);
-			// Coerces/unboxes array to int[].
-			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			String[] subarray = j2r.getValueStringArray1d();			
-			switch (this.arrayOrder) {
-			case ROW_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
-					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
-				currentFlatArrayIndex++; 
-				for (int j = 0; j < currentSubarrayIndex.length; j++) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case COLUMN_MAJOR:
-				for (int j = 0; j < subarrayLength; j++)
-					flatArray[currentFlatArrayIndex++] = subarray[j];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			case ROW_MAJOR_JAVA:
-				for (int j = 0; j < columnCount; j++)
-					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
-				if ((i + 1) % rowCount == 0) {
-					matrixIndex++;
-					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
-				} else {
-					currentFlatArrayIndex++;
-				}
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-				break;
-			}
-		}
-		return flatArray;
-	}
 	
 	/*
 	 * Collections are converted to vectors, n-dimensional arrays, data frames,
@@ -1158,6 +796,441 @@ public class JavaToR {
 		this.value = new Object[] {types, objects, names};
 	}
 
+	private void convertNdimensionalBooleanArray() {
+		int flatLength = this.dimensions[0];
+		for (int i = 1; i < this.dimensions.length; i++)
+			flatLength *= this.dimensions[i];
+		boolean[] flatArray = new boolean[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = this.dimensions[this.dimensions.length - 1];
+		int subarrayCount = 0;
+		if (subarrayLength != 0)
+			subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = this.dimensions[this.dimensions.length - 2];
+		int columnCount = this.dimensions[this.dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = this.value;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			boolean[] subarray = j2r.getValueBooleanArray1d();
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		// Update dimensions to R index order (i.e. row-major order).
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+	}
+	
+	private void convertNdimensionalByteArray() {
+		int flatLength = this.dimensions[0];
+		for (int i = 1; i < this.dimensions.length; i++)
+			flatLength *= this.dimensions[i];
+		byte[] flatArray = new byte[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = this.dimensions[this.dimensions.length - 1];
+		int subarrayCount = 0;
+		if (subarrayLength != 0)
+			subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = this.dimensions[this.dimensions.length - 2];
+		int columnCount = this.dimensions[this.dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = this.value;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			byte[] subarray = j2r.getValueByteArray1d();			
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		// Update dimensions to R index order (i.e. row-major order).
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+	}
+	
+	private void convertNdimensionalDoubleArray() {
+		int flatLength = this.dimensions[0];
+		for (int i = 1; i < this.dimensions.length; i++)
+			flatLength *= this.dimensions[i];
+		double[] flatArray = new double[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = this.dimensions[this.dimensions.length - 1];
+		int subarrayCount = 0;
+		if (subarrayLength != 0)
+			subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = this.dimensions[this.dimensions.length - 2];
+		int columnCount = this.dimensions[this.dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = this.value;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			double[] subarray = j2r.getValueDoubleArray1d();			
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		// Update dimensions to R index order (i.e. row-major order).
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+	}
+	
+	private void convertNdimensionalIntArray() {
+		int flatLength = this.dimensions[0];
+		for (int i = 1; i < this.dimensions.length; i++)
+			flatLength *= this.dimensions[i];
+		int[] flatArray = new int[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = this.dimensions[this.dimensions.length - 1];
+		int subarrayCount = 0;
+		if (subarrayLength != 0)
+			subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = this.dimensions[this.dimensions.length - 2];
+		int columnCount = this.dimensions[this.dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = this.value;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			int[] subarray = j2r.getValueIntArray1d();			
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		// Update dimensions to R index order (i.e. row-major order).
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+	}
+	
+	private void convertNdimensionalStringArray() {
+		int flatLength = this.dimensions[0];
+		for (int i = 1; i < this.dimensions.length; i++)
+			flatLength *= this.dimensions[i];
+		String[] flatArray = new String[flatLength];
+		int currentFlatArrayIndex = 0;
+		int subarrayLength = this.dimensions[this.dimensions.length - 1];
+		int subarrayCount = 0;
+		if (subarrayLength != 0)
+			subarrayCount = flatLength / subarrayLength;
+		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
+		// These three variables are used only for ROW_MAJOR_JAVA
+		int rowCount = this.dimensions[this.dimensions.length - 2];
+		int columnCount = this.dimensions[this.dimensions.length - 1];
+		int matrixIndex = 0;
+		for (int i = 0; i < subarrayCount; i++) {
+			Object o = this.value;
+			for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+				o = Array.get(o, currentSubarrayIndex[j]);
+			// Coerces/unboxes array to int[].
+			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			String[] subarray = j2r.getValueStringArray1d();			
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					/*
+					 *  The offset is the same as subarrayCount because of the way the data structure fills
+					 *  to mimic R's indexing scheme. Step through it to see how it works.
+					 */
+					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
+				currentFlatArrayIndex++; 
+				for (int j = 0; j < currentSubarrayIndex.length; j++) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case COLUMN_MAJOR:
+				for (int j = 0; j < subarrayLength; j++)
+					flatArray[currentFlatArrayIndex++] = subarray[j];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			case ROW_MAJOR_JAVA:
+				for (int j = 0; j < columnCount; j++)
+					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
+				if ((i + 1) % rowCount == 0) {
+					matrixIndex++;
+					currentFlatArrayIndex = matrixIndex * rowCount * columnCount;
+				} else {
+					currentFlatArrayIndex++;
+				}
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < this.dimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+				break;
+			}
+		}
+		// Update dimensions to R index order (i.e. row-major order).
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+	}
+	
 	/*
 	 * Nashorn JavaScript returns ScriptObjectMirror objects for anything that
 	 * is not a scalar, including native JavaScript arrays. The JS arrays are
@@ -1192,25 +1265,25 @@ public class JavaToR {
 			if (cls.equals(Double.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.NUMERIC;
 				if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Integer.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.INTEGER;
 				if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalIntArray(this.value, this.dimensions)};
+					convertNdimensionalIntArray();
 				return;
 			}
 			if (cls.equals(Boolean.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.LOGICAL;
 				if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalBooleanArray(this.value, this.dimensions)};
+					convertNdimensionalBooleanArray();
 				return;
 			}
 			if (cls.equals(Byte.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.RAW;
 				if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalByteArray(this.value, this.dimensions)};
+					convertNdimensionalByteArray();
 				return;
 			}
 			if (cls.equals(Float.TYPE)) {
@@ -1218,7 +1291,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((float[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Long.TYPE)) {
@@ -1226,7 +1299,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((long[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Short.TYPE)) {
@@ -1234,7 +1307,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((short[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalIntArray(this.value, this.dimensions)};
+					convertNdimensionalIntArray();
 				return;
 			}
 			if (cls.equals(Character.TYPE)) {
@@ -1244,7 +1317,7 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((char[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalStringArray(this.value, this.dimensions)};
+					convertNdimensionalStringArray();
 				return;
 			}
 		}
@@ -1254,7 +1327,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = unboxArray1D((Double[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Integer.class)) {
@@ -1262,7 +1335,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = unboxArray1D((Integer[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalIntArray(this.value, this.dimensions)};
+					convertNdimensionalIntArray();
 				return;
 			}
 			if (cls.equals(Byte.class)) {
@@ -1270,7 +1343,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = unboxArray1D((Byte[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalByteArray(this.value, this.dimensions)};
+					convertNdimensionalByteArray();
 				return;
 			}
 			if (cls.equals(Float.class)) {
@@ -1280,7 +1353,7 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((Float[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Long.class)) {
@@ -1290,7 +1363,7 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((Long[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(Short.class)) {
@@ -1300,7 +1373,7 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((Short[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalIntArray(this.value, this.dimensions)};
+					convertNdimensionalIntArray();
 				return;
 			}
 			if (cls.equals(BigDecimal.class)) {
@@ -1310,7 +1383,7 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((BigDecimal[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 			if (cls.equals(BigInteger.class)) {
@@ -1320,14 +1393,14 @@ public class JavaToR {
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 					this.value = coerceArray1D((BigInteger[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-					this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalDoubleArray(this.value, this.dimensions)};
+					convertNdimensionalDoubleArray();
 				return;
 			}
 		}
 		if (cls.equals(String.class)) {
 			this.rDataTypeCode = RdataTypeCode.CHARACTER;
 			if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-				this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalStringArray(this.value, this.dimensions)};
+				convertNdimensionalStringArray();
 			return;
 		}
 		if (cls.equals(Boolean.class)) {
@@ -1335,7 +1408,7 @@ public class JavaToR {
 			if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 				this.value = unboxArray1D((Boolean[]) this.value);
 			else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-				this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalBooleanArray(this.value, this.dimensions)};
+				convertNdimensionalBooleanArray();
 			return;
 		}
 		if (cls.equals(Character.class)) {
@@ -1345,7 +1418,7 @@ public class JavaToR {
 			else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
 				this.value = coerceArray1D((Character[]) this.value);
 			else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
-				this.value = new Object[] {this.dimensions, coerceFlattenNdimensionalStringArray(this.value, this.dimensions)};
+				convertNdimensionalStringArray();
 			return;
 		}
 		this.rDataTypeCode = RdataTypeCode.UNSUPPORTED;

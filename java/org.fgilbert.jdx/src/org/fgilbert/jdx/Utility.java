@@ -767,4 +767,69 @@ public class Utility {
 		return true;
 	}
 	
+	public static void reverseArray(boolean[] array) {
+		if (array == null)
+			return;
+		boolean swap; int rightIdx = 0;
+		int goTo = array.length / 2;
+		for (int i = 0; i < goTo; i++) {
+			rightIdx = array.length - i - 1;
+			swap = array[i];
+			array[i] = array[rightIdx];
+			array[rightIdx] = swap;
+		}
+	}
+	
+	public static void reverseArray(byte[] array) {
+		if (array == null)
+			return;
+		byte swap; int rightIdx = 0;
+		int goTo = array.length / 2;
+		for (int i = 0; i < goTo; i++) {
+			rightIdx = array.length - i - 1;
+			swap = array[i];
+			array[i] = array[rightIdx];
+			array[rightIdx] = swap;
+		}
+	}
+	
+	public static void reverseArray(double[] array) {
+		if (array == null)
+			return;
+		double swap; int rightIdx = 0;
+		int goTo = array.length / 2;
+		for (int i = 0; i < goTo; i++) {
+			rightIdx = array.length - i - 1;
+			swap = array[i];
+			array[i] = array[rightIdx];
+			array[rightIdx] = swap;
+		}
+	}
+	
+	public static void reverseArray(int[] array) {
+		if (array == null)
+			return;
+		int swap; int rightIdx = 0;
+		int goTo = array.length / 2;
+		for (int i = 0; i < goTo; i++) {
+			rightIdx = array.length - i - 1;
+			swap = array[i];
+			array[i] = array[rightIdx];
+			array[rightIdx] = swap;
+		}
+	}
+	
+	public static void reverseArray(String[] array) {
+		if (array == null)
+			return;
+		String swap; int rightIdx = 0;
+		int goTo = array.length / 2;
+		for (int i = 0; i < goTo; i++) {
+			rightIdx = array.length - i - 1;
+			swap = array[i];
+			array[i] = array[rightIdx];
+			array[rightIdx] = swap;
+		}
+	}
+	
 }
