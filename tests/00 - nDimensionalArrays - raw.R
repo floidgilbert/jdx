@@ -313,7 +313,7 @@ for (i in 0:5) {
     for (k in 0:5) {
       a <- array(as.raw(1:(i * j * k)), c(i, j, k))
       a.i <- array(1:(i * j * k), c(i, j, k))
-      b <- array(as.raw(0L), c(j, i, k))
+      b <- array(0L, c(j, i, k))
       if (length(b)) {
         for (q in 1:k)
           b[, , q] <- t(a.i[, , q])
@@ -345,7 +345,7 @@ for (i in 0:5) {
       for (l in 0:5) {
         a <- array(as.raw(1:(i * j * k * l)), c(i, j, k, l))
         a.i <- array(1:(i * j * k * l), c(i, j, k, l))
-        b <- array(as.raw(0L), c(j, i, k, l))
+        b <- array(0L, c(j, i, k, l))
         if (length(b)) {
           for (q in 1:k) {
             for (r in 1:l) {
@@ -386,7 +386,7 @@ for (i in 0:5) {
         for (m in 0:3) {
           a <- array(as.raw(1:(i * j * k * l * m)), c(i, j, k, l, m))
           a.i <- array(1:(i * j * k * l * m), c(i, j, k, l, m))
-          b <- array(as.raw(0L), c(j, i, k, l, m))
+          b <- array(0L, c(j, i, k, l, m))
           if (length(b)) {
             for (q in 1:k) {
               for (r in 1:l) {
