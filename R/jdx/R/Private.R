@@ -181,7 +181,7 @@ coerceFactor <- function(value) {
 # These functions must execute quickly, and they are private, so there is no 
 # parameter checking.
 
-# Assumes 'value' is a logical vector or matrix.
+# Assumes 'value' is a logical vector or array.
 # IMPORTANT: This function throws warnings! If any warning handler is in
 # place, execution will be interrupted when a warning is
 # propagated.

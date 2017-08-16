@@ -70,6 +70,11 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
   }
 
   if (is.array(value)) {
+    if (is.logical(value)) {
+      value <- coerceLogicalNaValues(value)
+    } else if (is.complex(value)) {
+      throwUnsupportedRtypeException("complex")
+    }
     if (length(dim(value)) == 1)
       return(convertToJava(as.vector(value), length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = scalars.as.objects))
     if (array.order == "row-major")
@@ -121,58 +126,6 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
     return(convertToJava(as.character(value), length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = scalars.as.objects))
   }
   
-  #///remove and replace with nd-arrays. make sure the same behavior is replicated. then remove this code.
-  # if (is.matrix(value)) {
-  #   if (is.logical(value)) {
-  #     value <- coerceLogicalNaValues(value)
-  #   } else if (is.complex(value)) {
-  #     throwUnsupportedRtypeException("complex")
-  #   }
-  # 
-  #   #///document somewhere.
-  #   # By default, rJava converts matrices as row-major. The default behavior for
-  #   # zero-length matrices is as follows, assuming the variable names is
-  #   # 'value'.
-  #   # 
-  #   #     matrix(0, 0, 0) becomes double[][] value = {};
-  #   #     matrix(0, 0, 1) becomes double[][] value = {};
-  #   #     matrix(0, 1, 0) becomes double[][] value = {{}};
-  #   #     
-  #   # jdx supports column-major matrices. It mimics the zero-length
-  #   # row-major behavior as follows.
-  #   # 
-  #   #     matrix(0, 0, 0) becomes double[][] value = {};
-  #   #     matrix(0, 0, 1) becomes double[][] value = {{}};
-  #   #     matrix(0, 1, 0) becomes double[][] value = {};
-  #   
-  #   if (row.major)
-  #     return(.jarrayTemp(value, dispatch = TRUE))
-  #   
-  #   # row.major = FALSE, i.e. the matrix is column-major
-  #   # 
-  #   # This block handles the zero-length cases as noted above in the
-  #   # column-major context.
-  #   if (0 %in% dim(value))
-  #     return(.jarrayTemp(t(value), dispatch = TRUE))
-  #   
-  #   contents.class <- {
-  #     if (is.double(value))
-  #       "[D"
-  #     else if (is.character(value))
-  #       "[Ljava/lang/String;"
-  #     else if (is.integer(value))
-  #       "[I"
-  #     else if (is.logical(value))
-  #       "[Z"
-  #     else if (is.raw(value))
-  #       "[B"
-  #     else
-  #       throwUnsupportedRtypeException(class(value))
-  #   }
-  #   
-  #   return(.jarrayTemp(apply(value, 2, rJava::.jarray), contents.class = contents.class))
-  # }
-
   if (is.null(value))
     return(rJava::.jnull())
   
@@ -360,7 +313,7 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
     if (data.code[1] == TC_INTEGER)
       return(array(rJava::.jevalArray(x[[2]], "[I"), dimensions))
     if (data.code[1] == TC_CHARACTER)
-      return(array(rJava::.jevalArray(x[[2]], "[S"), dimensions))
+      return(array(rJava::.jevalArray(x[[2]], "[Ljava/lang/String;"), dimensions))
     if (data.code[1] == TC_LOGICAL)
       return(array(rJava::.jevalArray(x[[2]], "[Z"), dimensions))
     if (data.code[1] == TC_RAW) {

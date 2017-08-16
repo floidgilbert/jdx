@@ -461,7 +461,8 @@ public class JavaToR {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
-			boolean[] subarray = j2r.getValueBooleanArray1d();			
+			this.rDataExceptionCode = j2r.rDataExceptionCode; // Catch warning for java.lang.Boolean[] containing nulls
+			boolean[] subarray = j2r.getValueBooleanArray1d();
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
@@ -533,6 +534,7 @@ public class JavaToR {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
+			this.rDataExceptionCode = j2r.rDataExceptionCode; // Catch warning for java.lang.Byte[] containing nulls
 			byte[] subarray = j2r.getValueByteArray1d();			
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
