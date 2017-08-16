@@ -1,5 +1,7 @@
 package org.fgilbert.jdx;
 
+///re-read all comments now that we support n-dimensional arrays. remove comments about matrices
+
 /*
  * This class was written to optimize marshalling data between the JVM and R via rJava. 
  * A balance between performance and code clarity is the goal, but intuition has been sacrificed 
@@ -803,15 +805,16 @@ public class JavaToR {
 	}
 	
 	/*
-	 * Collections are converted to vectors, matrices, data frames, or unnamed
-	 * lists depending on the content. See convertCollectionToArray1D for rules
-	 * used to convert collections to vectors. Collections are converted to
-	 * matrices if it contains > 1 similarly-typed, same-length
+	 * Collections are converted to vectors, n-dimensional arrays, data frames,
+	 * or unnamed lists depending on the content. See convertCollectionToArray1D
+	 * for rules used to convert collections to vectors. Collections are
+	 * converted to matrices if it contains > 1 similarly-typed, same-length
 	 * vectors. Collections are converted to data frames if they contain
 	 * homogeneous named lists (i.e. Java maps). All other combinations of
 	 * objects/values will be converted to unnamed lists.
 	 */
 	private void convertCollection() {
+		///remember to set this.dimensions when converting to n-dimensional array. or even one-dimensional for that matter.
 		Collection<?> col = (Collection<?>) this.value;
 		if (col.isEmpty()) {
 			// Return empty list.
