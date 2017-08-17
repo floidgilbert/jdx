@@ -1,9 +1,11 @@
 # Standard Interface ------------------------------------------------------
 # Most developers should use the standard interface.
 
-#///record the fact that when scalars.as.objects = FALSE, a scalar byte will be returned as rJava::.jbyte(value)
+#///maybe don't say that they are inverses... I said so tho'. 
+#///note the zero-length behavior in n-dimensional arrays.
 #///also note that convertToJava and convertToR are not exactly inverses in every case because of the behavior of Java. Sometimes scalars are returned as R objects because that's what rJava wants.
 #///you've forgotten to validate the parameters in every case here. probably just validate them in the if/else or select statements.
+#///review the unit testing for jdx now that I've changed the parameters.
 #' @export
 convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
   

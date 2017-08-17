@@ -1,9 +1,7 @@
 #///mention jsr223 in documentation. tell them to use it instead of rJava.///
 #///write up release notes...what to do. download latest R build, build both jar files, build R, run tests, etc.
 #///consider implementing major and minor indexing for arrays.
-#///devtools::install(build_vignettes = TRUE); library(jdx); ?jdx
-#///add the array tests in temp to unit testing and add jsonlite to recommends? no. just leave in outer testing folder. but do that after you have added zero-length stuff.
-#///still need to handle arrays coming from jdx to R.
+#///devtools::install(build_vignettes = TRUE); library(jdx); ?jdx ///add this line to release notes? no.
 # Constants ---------------------------------------------------------------
 
 # Type codes used to determine return value types coming from Java. While
@@ -26,7 +24,7 @@ SC_ND_ARRAY <- 0x200L # n-dimensional array
 SC_DATA_FRAME <- 0x300L
 SC_LIST <- 0x400L
 SC_NAMED_LIST <- 0x500L
-SC_USER_DEFINED <- 0xFF00L #///how is this going to work. Or is it? remember, I added it to the Java side also.
+SC_USER_DEFINED <- 0xFF00L
 
 # Exception codes. See processCompositeDataCode().
 EC_NONE <- 0x00000L
