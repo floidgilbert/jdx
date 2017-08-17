@@ -1500,6 +1500,10 @@ public class JavaToR {
 		return (String[]) value;
 	}
 	
+	public int initialize(Object value) {
+		return this.initialize(value, ArrayOrder.ROW_MAJOR);
+	}
+	
 	/*
 	 * Map Java objects to intermediate values that can be easily converted to R
 	 * objects.
