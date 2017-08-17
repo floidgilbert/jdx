@@ -1,9 +1,6 @@
 # Standard Interface ------------------------------------------------------
 # Most developers should use the standard interface.
 
-#///maybe don't say that they are inverses... I said so tho'. 
-#///note the zero-length behavior in n-dimensional arrays.
-#///also note that convertToJava and convertToR are not exactly inverses in every case because of the behavior of Java. Sometimes scalars are returned as R objects because that's what rJava wants.
 #///you've forgotten to validate the parameters in every case here. probably just validate them in the if/else or select statements.
 #///review the unit testing for jdx now that I've changed the parameters.
 #' @export
@@ -197,8 +194,12 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
   throwUnsupportedRtypeException(class(value))
 }
 
-#///explain why we use jdx.j2r
-#///this is not thread-safe, correct? if you want something thread-safe, probably use low-level interface.
+# The Java code for convertToR is contained in the class
+# org.fgilbert.jdx.JavaToR. The jdx.j2r variable is bound to a an instance of
+# this class that is re-used to improve performance. Recreating instances of
+# JavaToR is very expensive via rJava. Unfortunately, this performance comes as
+# the cost of thread-safety. Do not call convertToR from separate threads. Use
+# convertToRlowLevel for thread-safe conversion.
 #' @export
 convertToR <- function(value, strings.as.factors = NULL, array.order = "row-major") {
   composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE), array.order.values[[array.order]])
@@ -266,23 +267,12 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       
       if (data.code[2] == SC_SCALAR) {
         if (data.code[1] == TC_RAW)
-          return(as.raw(bitwAnd(rJava::.jsimplify(objects[[i]]), 0xff))) #///testbyte
+          return(as.raw(bitwAnd(rJava::.jsimplify(objects[[i]]), 0xff)))
         return(rJava::.jsimplify(objects[[i]]))
       }
 
       if (data.code[2] == SC_VECTOR)
         return(rJava::.jevalArray(objects[[i]], rawJNIRefSignature = dataCodeToJNI(data.code)))
-
-      # Replaced by SC_ND_ARRAY code, which is more generalized and faster. That
-      # isn't to say that the Java code has been optimized for performance. It could
-      # be made to be even faster.
-      # 
-      # if (data.code[2] == SC_MATRIX) {
-      #   r <- rJava::.jevalArray(objects[[i]], rawJNIRefSignature = dataCodeToJNI(data.code), simplify = TRUE)
-      #   if (row.major)
-      #     return(r)
-      #   return(t(r))
-      # }
 
       #///make sure rowmajor settings work correctly in this scenario
       if (data.code[2] == SC_ND_ARRAY)
@@ -349,8 +339,8 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       # behavior is inconsistent because rJava converts byte arrays to raw 
       # values without hesitation and bitwise. So Java -1 maps to R 0xff. So,
       # that leaves me in a quandry. I have decided to make the behavior between
-      # the scalars and the arrays consistent. ///document this fact.
-      return(as.raw(bitwAnd(rJava::.jcall(j2r, "B", "getValueByte", check = FALSE), 0xff))) #///testbyte
+      # the scalars and the arrays consistent.
+      return(as.raw(bitwAnd(rJava::.jcall(j2r, "B", "getValueByte", check = FALSE), 0xff)))
     }
     throwUnsupportedDataCodeException(data.code)
   }
@@ -365,33 +355,9 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
     if (data.code[1] == TC_LOGICAL)
       return(rJava::.jcall(j2r, "[Z", "getValueBooleanArray1d", check = FALSE))
     if (data.code[1] == TC_RAW)
-      return(rJava::.jcall(j2r, "[B", "getValueByteArray1d", check = FALSE)) #///testbyte
+      return(rJava::.jcall(j2r, "[B", "getValueByteArray1d", check = FALSE))
     throwUnsupportedDataCodeException(data.code)
   }
-
-  # Replaced by SC_ND_ARRAY code, which is both generalized and faster. That
-  # isn't to say that the Java code has been optimized for performance. It could
-  # be made to be even faster.
-  # 
-  # if (data.code[2] == SC_MATRIX) {
-  #   r <- NULL
-  #   if (data.code[1] == TC_NUMERIC) {
-  #     r <- rJava::.jcall(j2r, "[[D", "getValueDoubleArray2d", check = FALSE, simplify = TRUE)
-  #   } else if (data.code[1] == TC_INTEGER) {
-  #     r <- rJava::.jcall(j2r, "[[I", "getValueIntArray2d", check = FALSE, simplify = TRUE)
-  #   } else if (data.code[1] == TC_CHARACTER) {
-  #     r <- rJava::.jcall(j2r, "[[Ljava/lang/String;", "getValueStringArray2d", check = FALSE, simplify = TRUE)
-  #   } else if (data.code[1] == TC_LOGICAL) {
-  #     r <- rJava::.jcall(j2r, "[[Z", "getValueBooleanArray2d", check = FALSE, simplify = TRUE)
-  #   } else if (data.code[1] == TC_RAW) {
-  #     r <- rJava::.jcall(j2r, "[[B", "getValueByteArray2d", check = FALSE, simplify = TRUE) #///testbyte
-  #   } else {
-  #     throwUnsupportedDataCodeException(data.code)
-  #   }
-  #   if (row.major)
-  #     return(r)
-  #   return(t(r))
-  # }
 
   if (data.code[2] == SC_ND_ARRAY)
     return(createNdimensionalArray(rJava::.jcall(j2r, "[Ljava/lang/Object;", "getValueObjectArray1d", check = FALSE)))
@@ -405,8 +371,6 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
   throwUnsupportedDataCodeException(data.code)
 }
 
-#///document what's going on. if data.code provided, we assume we don't need to check it or anything
-#data.code needs to correspond to j2r. this is a time-saving device.
 #' @export
 createJavaToRobject <- function() {
   rJava::.jnew("org/fgilbert/jdx/JavaToR")

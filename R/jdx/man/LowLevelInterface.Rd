@@ -10,7 +10,7 @@ Low-level Interface for jdx
 }
 
 \description{
-The \CRANpkg{jdx} package was originally developed as part of \CRANpkg{jsr223}, a high-level integration package for Java. The functions listed here are exposed for compatibility with \pkg{jsr223} only; they are not meant to be used by other packages. Instead, use \code{\link{convertToJava}}, \code{\link{convertToR}}, and \code{\link{getJavaClassName}}.
+The functions listed here are part of the low-level interface for \CRANpkg{jdx} and are primarily used behind the scenes in \CRANpkg{jsr223}, the high-level integration package for Java. Java developers are encouraged to use \pkg{jsr223} or the high-level \pkg{jdx} functions \code{\link{convertToJava}}, \code{\link{convertToR}}, and \code{\link{getJavaClassName}}. ///However, the low-level interface may be of interest to \CRANpkg{rJava} developers interested in thr \pkg{} ///provide/edit simple example of thread-safe version.
 }
 
 \usage{
@@ -40,10 +40,10 @@ processCompositeDataCode(
 An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} enumeration value.
 }
   \item{j2r}{
-An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object.
+An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object. Use \code{createJavaToRobject} to create an instance.
 }
   \item{data.code}{
-A \pkg{jdx} data code value.
+A \pkg{jdx} data code value created with \code{processCompositeDataCode}.
 }
   \item{strings.as.factors}{
 See \code{\link{convertToJava}}.
@@ -68,4 +68,22 @@ A logical value indicating whether to raise a specific warning.
   , \code{\link{getJavaClassName}}
 }
 
+\examples{
+library("jdx")
+
+#///describe what's going on.
+j2r <- jdx::createJavaToRobject() #///create one object per thread. or create it from your java package and return a reference.
+composite.data.code <- rJava::.jcall(
+  j2r
+  , "I"
+  , "initialize"
+  , rJava::.jcast(convertToJava(iris))
+  , jdx::jdxConstants()$ARRAY_ORDER[['column-major']] #///always required...or is it? ///make this faster by caching
+)
+data.code <- processCompositeDataCode(j2r, composite.data.code)
+convertToRlowLevel(j2r, data.code)
+
+}
+
 \keyword{ interface }
+

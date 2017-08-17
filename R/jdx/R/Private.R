@@ -1,6 +1,4 @@
-#///mention jsr223 in documentation. tell them to use it instead of rJava.///
 #///write up release notes...what to do. download latest R build, build both jar files, build R, run tests, etc.
-#///consider implementing major and minor indexing for arrays.
 #///devtools::install(build_vignettes = TRUE); library(jdx); ?jdx ///add this line to release notes? no.
 # Constants ---------------------------------------------------------------
 
