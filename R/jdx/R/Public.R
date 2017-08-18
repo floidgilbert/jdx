@@ -1,10 +1,19 @@
 # Standard Interface ------------------------------------------------------
 # Most developers should use the standard interface.
 
-#///you've forgotten to validate the parameters in every case here. probably just validate them in the if/else or select statements.
 #///review the unit testing for jdx now that I've changed the parameters.
 #' @export
 convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
+  
+  # array.order is validated later.
+  if (!is.logical(length.one.vector.as.array) || length(length.one.vector.as.array) != 1)
+    stop("The parameter 'length.one.vector.as.array' requires a length-one logical vector.")
+  if (!is.logical(scalars.as.objects) || length(scalars.as.objects) != 1)
+    stop("The parameter 'scalars.as.objects' requires a length-one logical vector.")
+  if (!is.logical(data.frame.row.major) || length(data.frame.row.major) != 1)
+    stop("The parameter 'data.frame.row.major' requires a length-one logical vector.")
+  if (!is.logical(coerce.factors) || length(coerce.factors) != 1)
+    stop("The parameter 'coerce.factors' requires a length-one logical vector.")
   
   # The class AsIs (set via the function I()) can be used to indicate that
   # length one vectors/arrays/factors should be converted to arrays, not
@@ -202,7 +211,17 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
 # convertToRlowLevel for thread-safe conversion.
 #' @export
 convertToR <- function(value, strings.as.factors = NULL, array.order = "row-major") {
-  composite.data.code <- rJava::.jcall(jdx.j2r, "I", "initialize", rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE), array.order.values[[array.order]])
+  # strings.as.factors is validated in convertToRlowLevel()
+  array.order.value <- array.order.values[[array.order]]
+  if (is.null(array.order.value))
+    stop(sprintf("Invalid 'array.order' parameter: '%s'.", array.order))
+  composite.data.code <- rJava::.jcall(
+    jdx.j2r
+    , "I"
+    , "initialize"
+    , rJava::.jcast(value, new.class = "java/lang/Object", check = FALSE, convert.array = FALSE)
+    , array.order.value
+  )
   data.code <- processCompositeDataCode(jdx.j2r, composite.data.code)
   convertToRlowLevel(jdx.j2r, data.code, strings.as.factors)
 }
@@ -312,6 +331,11 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       return(array(rJava::.jevalArray(x[[2]], "[B"), dimensions))
     }
     throwUnsupportedDataCodeException(data.code)
+  }
+  
+  if (!is.null(strings.as.factors)) {
+    if (!is.logical(strings.as.factors) || length(strings.as.factors) != 1)
+      stop("The parameter 'strings.as.factors' requires a length-one logical vector or NULL.")
   }
 
   # If a data.code is not provided, retrieve and process it.

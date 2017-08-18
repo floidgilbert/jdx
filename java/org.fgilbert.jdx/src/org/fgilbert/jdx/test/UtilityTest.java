@@ -7,13 +7,6 @@ import org.junit.Test;
 
 public class UtilityTest {
 
-	///
-//	@Test
-//	public void testFlattenRectangularArrayInt() {
-//		assertArrayEquals(null, Utility.flattenRectangularArrayInt(null));
-//		assertArrayEquals(new int[0], Utility.flattenRectangularArrayInt(new int[0]));
-//	}
-	
 	@Test
 	public void testCreateNdimensionalArrayRowMajorJava() {
 		int max; int[] dimensions; int[] data;

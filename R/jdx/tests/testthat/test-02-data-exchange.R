@@ -7,4 +7,8 @@ library(jdx)
 # the tests were originally developed.
 # 
 # See jsr223 test scripts for data exchange unit tests.
+# 
+# Also, see ../../../../tests/*
+
+
 

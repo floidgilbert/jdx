@@ -106,28 +106,46 @@ public class JavaToR {
 	/*
 	 * This class is used to detect whether a collection represents a matrix.
 	 */
-	private class MaybeMatrix {
+	private class MaybeNdimensionalArray {
 
-		private int subarrayLength;
+		private Class<?> componentType;
+		private int[] dimensions;
+		private boolean typeChanged = false;
 		private RdataTypeCode typeCode;
 		private boolean value = false;
 		
-		MaybeMatrix(Collection<?> col, JavaToR j2r) {
-			
-			value = 
-					j2r.getRdataStructureCode() == RdataStructureCode.VECTOR
-					&& col.size() > 1;
-			if (!value)
+		MaybeNdimensionalArray(int collectionSize, JavaToR j2r) {
+			if (collectionSize == 0)
 				return;
+			switch (j2r.getRdataStructureCode()) {
+			case VECTOR:
+			case ND_ARRAY:
+				value = true;
+				break;
+			default:
+				return;
+			}
+			componentType = j2r.getComponentType(); ///don't do this here or in j2r. just use type codes. maybe create a function to translate back and forth between component type and type code.
+			dimensions = j2r.getDimensions();
 			typeCode = j2r.getRdataTypeCode();
-			subarrayLength = Array.getLength(j2r.value);
+		}
+		
+		Class<?> getComponentType() {
+			return componentType;
+		}
+		
+		int[] getDimensions() {
+			return dimensions;
+		}
+		
+		boolean getTypeChanged() {
+			return typeChanged;
 		}
 
-////
-//		RdataTypeCode getTypeCode() {
-//			return typeCode;
-//		}
-//		
+		RdataTypeCode getTypeCode() {
+			return typeCode;
+		}
+		
 		boolean getValue() {
 			return value;
 		}
@@ -135,23 +153,34 @@ public class JavaToR {
 		boolean update(JavaToR j2r) {
 			if (!value)
 				return false;
-			value = 
-					j2r.getRdataStructureCode() == RdataStructureCode.VECTOR
-					&& Array.getLength(j2r.value) == subarrayLength; // Is the current value length the same length as the last value?
+			switch (j2r.getRdataStructureCode()) {
+			case VECTOR:
+			case ND_ARRAY:
+				value = Arrays.equals(dimensions, j2r.dimensions);
+				break;
+			default:
+				value = false;
+				break;
+			}
 			if (!value)
 				return false;
-			// Check and update matrix data typeCode.
+			
+			// Check and update data typeCode.
 			if (typeCode != j2r.getRdataTypeCode()) {
 				if (typeCode == RdataTypeCode.NUMERIC && (j2r.getRdataTypeCode() == RdataTypeCode.INTEGER || j2r.getRdataTypeCode() == RdataTypeCode.RAW)) {
 					// Do nothing. Integer and raw arrays will be coerced to numeric.
 				} else if ((typeCode == RdataTypeCode.INTEGER || typeCode == RdataTypeCode.RAW) && j2r.getRdataTypeCode() == RdataTypeCode.NUMERIC) {
-					// Change matrix type to numeric. Integer and raw arrays will be coerced to numeric.
+					// Change type to numeric. Integer and raw arrays will be coerced to numeric.
+					componentType = double.class;
 					typeCode = RdataTypeCode.NUMERIC;
+					typeChanged = true;
 				} else if (typeCode == RdataTypeCode.INTEGER && j2r.getRdataTypeCode() == RdataTypeCode.RAW) {
 					// Do nothing. Raw arrays will be coerced to integer.
 				} else if (typeCode == RdataTypeCode.RAW && j2r.getRdataTypeCode() == RdataTypeCode.INTEGER) {
-					// Revert matrix type to integer. Raw arrays will be coerced to integer.
+					// Revert type to integer. Raw arrays will be coerced to integer.
+					componentType = int.class;
 					typeCode = RdataTypeCode.INTEGER;
+					typeChanged = true;
 				} else {
 					value = false;
 				}
@@ -254,6 +283,7 @@ public class JavaToR {
 	 * expensive calls to create new object references in rJava.
 	 */
 	private ArrayOrder arrayOrder;
+	private Class<?> componentType; // Only valid for arrays or collections converted to an array.
 	private int[] dimensions;
 	private boolean isNamedListOfScalars; // Used to detect row major data frames.
 	private RdataExceptionCode rDataExceptionCode;
@@ -477,20 +507,20 @@ public class JavaToR {
 		Object[] objects = new Object[col.size()];
 		objects[0] = j2r.getValueObject();
 
-		MaybeMatrix maybeMatrix = new MaybeMatrix(col, j2r);
+		MaybeNdimensionalArray maybeNdimensionalArray = new MaybeNdimensionalArray(col.size(), j2r);
 		MaybeRowMajorDataFrame maybeRowMajorDataFrame = new MaybeRowMajorDataFrame(j2r);
 		for (int i = 1; i < types.length; i++) {
 			j2r = new JavaToR(iter.next(), this.arrayOrder);
 			types[i] = j2r.getRdataCompositeCode();
 			objects[i] = j2r.getValueObject();
-			if (maybeMatrix.getValue()){
-				maybeMatrix.update(j2r);
+			if (maybeNdimensionalArray.getValue()){
+				maybeNdimensionalArray.update(j2r);
 			} else if (maybeRowMajorDataFrame.getValue()) {
 				maybeRowMajorDataFrame.update(j2r);
 			}
 		}
-		if (maybeMatrix.getValue()) {
-///resolve this			convertCollectionToArray2D(maybeMatrix, objects);
+		if (maybeNdimensionalArray.getValue()) {
+			convertCollectionToArrayND(maybeNdimensionalArray, objects);
 			return;
 		} else if (maybeRowMajorDataFrame.getValue()) {
 			convertCollectionToDataFrame(maybeRowMajorDataFrame, objects);
@@ -558,18 +588,24 @@ public class JavaToR {
 		 * must be tested in this order (from general to specific).
 		 */
 		if (numericVector) {
+			this.componentType = double.class;
+			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.NUMERIC;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
 			this.value = coerceCollectionToDoubleArray1D((Collection<Number>) col);
 			return true;
 		}
 		if (integerVector) {
+			this.componentType = int.class;
+			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.INTEGER;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
 			this.value = coerceCollectionToIntArray1D((Collection<Number>) col);
 			return true;
 		}
 		if (rawVector) {
+			this.componentType = byte.class;
+			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.RAW;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
 			this.value = coerceCollectionToByteArray1D((Collection<Number>) col);
@@ -577,12 +613,16 @@ public class JavaToR {
 		}
 		// Character and Logical vectors are exclusive (they don't mix with other types).
 		if (characterVector) {
+			this.componentType = String.class;
+			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.CHARACTER;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
 			this.value = coerceCollectionToStringArray1D(col);
 			return true;
 		}
 		if (logicalVector) {
+			this.componentType = boolean.class;
+			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.LOGICAL;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
 			this.value = coerceCollectionToBooleanArray1D((Collection<Boolean>) col);
@@ -591,98 +631,133 @@ public class JavaToR {
 		// The collection contains only nulls.
 		return false;
 	}
+	
+	///move this elsewhere
+	private Object coerceArrayND(Object array, Class<?> componentTypeSource, Class<?> componentTypeTarget) {
+		
+		if (double.class.equals(componentTypeTarget)) {
+			
+		}
+		switch(maybeNdimensionalArray.getTypeCode()) {
+		case NUMERIC:
+			double[][] d = new double[objects.length][];
+			for (int i = 0; i < objects.length; i++) {
+				/*
+				 * It is possible to get a mix of double[], int[], and byte[] sub-arrays.
+				 * Convert all to double[].
+				 * 
+				 * All arrays have been unboxed by this point.
+				 */
+				Class<?> ct = objects[i].getClass().getComponentType(); 
+				if (ct.equals(Double.TYPE)) {
+					d[i] = (double[]) objects[i];
+				} else if (ct.equals(Integer.TYPE)) {
+					d[i] = Arrays.stream((int[]) objects[i]).asDoubleStream().toArray();
+				} else if (ct.equals(Byte.TYPE)) {
+					byte[] b = (byte[]) objects[i];
+					double[] subarray = new double[b.length];
+					for (int j = 0; j < subarray.length; j++)
+						subarray[j] = (double) b[j];
+					d[i] = subarray;
+				} else {
+					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
+				}
+			}
+			this.value = d;
+			this.rDataTypeCode = RdataTypeCode.NUMERIC;
+			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+			return;
+		case INTEGER:
+			int[][] n = new int[objects.length][];
+			for (int i = 0; i < objects.length; i++) {
+				/*
+				 * It is possible to get a mix of int[], and byte[] sub-arrays.
+				 * Convert all to int[].
+				 * 
+				 * All arrays have been unboxed by this point.
+				 */
+				Class<?> ct = objects[i].getClass().getComponentType(); 
+				if (ct.equals(Integer.TYPE)) {
+					n[i] = (int[]) objects[i];
+				} else if (ct.equals(Byte.TYPE)) {
+					byte[] b = (byte[]) objects[i];
+					int[] subarray = new int[b.length];
+					for (int j = 0; j < subarray.length; j++)
+						subarray[j] = (int) b[j];
+					n[i] = subarray;
+				} else {
+					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
+				}
+			}
+			this.value = n;
+			this.rDataTypeCode = RdataTypeCode.INTEGER;
+			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+			return;
+		case CHARACTER:
+			String[][] s = new String[objects.length][];
+			for (int i = 0; i < objects.length; i++) {
+				s[i] = (String[]) objects[i];
+			}
+			this.value = s;
+			this.rDataTypeCode = RdataTypeCode.CHARACTER;
+			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+			return;
+		case LOGICAL:
+			boolean[][] z = new boolean[objects.length][];
+			for (int i = 0; i < objects.length; i++) {
+				// All arrays have been unboxed by this point. 
+				z[i] = (boolean[]) objects[i];
+			}
+			this.value = z;
+			this.rDataTypeCode = RdataTypeCode.LOGICAL;
+			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+			return;
+		case RAW:
+			byte[][] b = new byte[objects.length][];
+			for (int i = 0; i < objects.length; i++) {
+				// All arrays have been unboxed by this point. 
+				b[i] = (byte[]) objects[i];
+			}
+			this.value = b;
+			this.rDataTypeCode = RdataTypeCode.RAW;
+			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+			return;
+		default:
+			throw new RuntimeException(String.format("The R data type 0x%X is not supported for an n-dimensional array.", maybeNdimensionalArray.getTypeCode().value));
+		}
+		return null;
+	}
 
 	// This function is called only from within convertCollection.
-	/// Redo as n-dimensional.
-//	private void convertCollectionToArray2D(MaybeMatrix maybeMatrix, Object[] objects) {
-//		switch(maybeMatrix.getTypeCode()) {
-//		case NUMERIC:
-//			double[][] d = new double[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				/*
-//				 * It is possible to get a mix of double[], int[], and byte[] sub-arrays.
-//				 * Convert all to double[].
-//				 * 
-//				 * All arrays have been unboxed by this point.
-//				 */
-//				Class<?> ct = objects[i].getClass().getComponentType(); 
-//				if (ct.equals(Double.TYPE)) {
-//					d[i] = (double[]) objects[i];
-//				} else if (ct.equals(Integer.TYPE)) {
-//					d[i] = Arrays.stream((int[]) objects[i]).asDoubleStream().toArray();
-//				} else if (ct.equals(Byte.TYPE)) {
-//					byte[] b = (byte[]) objects[i];
-//					double[] subarray = new double[b.length];
-//					for (int j = 0; j < subarray.length; j++)
-//						subarray[j] = (double) b[j];
-//					d[i] = subarray;
-//				} else {
-//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
-//				}
-//			}
-//			this.value = d;
-//			this.rDataTypeCode = RdataTypeCode.NUMERIC;
-//			this.rDataStructureCode = RdataStructureCode.MATRIX;
-//			return;
-//		case INTEGER:
-//			int[][] n = new int[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				/*
-//				 * It is possible to get a mix of int[], and byte[] sub-arrays.
-//				 * Convert all to int[].
-//				 * 
-//				 * All arrays have been unboxed by this point.
-//				 */
-//				Class<?> ct = objects[i].getClass().getComponentType(); 
-//				if (ct.equals(Integer.TYPE)) {
-//					n[i] = (int[]) objects[i];
-//				} else if (ct.equals(Byte.TYPE)) {
-//					byte[] b = (byte[]) objects[i];
-//					int[] subarray = new int[b.length];
-//					for (int j = 0; j < subarray.length; j++)
-//						subarray[j] = (int) b[j];
-//					n[i] = subarray;
-//				} else {
-//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
-//				}
-//			}
-//			this.value = n;
-//			this.rDataTypeCode = RdataTypeCode.INTEGER;
-//			this.rDataStructureCode = RdataStructureCode.MATRIX;
-//			return;
-//		case CHARACTER:
-//			String[][] s = new String[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				s[i] = (String[]) objects[i];
-//			}
-//			this.value = s;
-//			this.rDataTypeCode = RdataTypeCode.CHARACTER;
-//			this.rDataStructureCode = RdataStructureCode.MATRIX;
-//			return;
-//		case LOGICAL:
-//			boolean[][] z = new boolean[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				// All arrays have been unboxed by this point. 
-//				z[i] = (boolean[]) objects[i];
-//			}
-//			this.value = z;
-//			this.rDataTypeCode = RdataTypeCode.LOGICAL;
-//			this.rDataStructureCode = RdataStructureCode.MATRIX;
-//			return;
-//		case RAW:
-//			byte[][] b = new byte[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				// All arrays have been unboxed by this point. 
-//				b[i] = (byte[]) objects[i];
-//			}
-//			this.value = b;
-//			this.rDataTypeCode = RdataTypeCode.RAW;
-//			this.rDataStructureCode = RdataStructureCode.MATRIX;
-//			return;
-//		default:
-//			throw new RuntimeException(String.format("The R data type 0x%X is not supported for a matrix data structure.", maybeMatrix.getTypeCode().value));
-//		}
-//	}
+	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects) {
+		int[] subarrayDimensions = maybeNdimensionalArray.getDimensions();
+		int[] newDimensions = new int[subarrayDimensions.length + 1];
+		newDimensions[0] = objects.length;
+		for (int i = 0; i < subarrayDimensions.length; i++)
+			newDimensions[i + 1] = subarrayDimensions[i];
+		Class<?> componentTypeSource = null;
+		Class<?> componentTypeTarget = maybeNdimensionalArray.getComponentType();
+		Object array = Array.newInstance(componentTypeTarget, newDimensions);
+		if (maybeNdimensionalArray.getTypeChanged()) {
+			for (int i = 0; i < newDimensions.length; i++) {
+				componentTypeSource = Utility.getArrayBaseComponentType(objects[i].getClass());
+				if (!componentTypeSource.equals(componentTypeTarget)) {
+					Array.set(array, i, coerceArrayND(objects[i], componentTypeSource, componentTypeTarget));
+				} else {
+					Array.set(array, i, objects[i]);
+				}
+			}
+		} else {
+			for (int i = 0; i < this.dimensions.length; i++)
+				Array.set(array, i, objects[i]);
+		}
+		this.componentType = componentTypeTarget;
+		this.dimensions = newDimensions;
+		this.value = new Object[] {this.dimensions, array};
+		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
+		this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+		return;
+	}
 	
 	/*
 	 * This function is called only from within convertCollection.
@@ -1428,6 +1503,10 @@ public class JavaToR {
 		return arrayOrder;
 	}
 	
+	public Class<?> getComponentType() {
+		return componentType;
+	}
+	
 	public int[] getDimensions() {
 		return dimensions;
 	}
@@ -1515,6 +1594,7 @@ public class JavaToR {
 	 */
 	public int initialize(Object value, ArrayOrder arrayOrder) {
 		this.arrayOrder = arrayOrder;
+		this.componentType = null;
 		this.dimensions = null;
 		this.isNamedListOfScalars = false; // Used to detect row major data frames.
 		this.rDataExceptionCode = RdataExceptionCode.NONE;
@@ -1559,12 +1639,14 @@ public class JavaToR {
 			 * this.rDataTypeCode == RdataTypeCode.UNSUPPORTED then it is not a
 			 * simple type supported by R.
 			 */
-			convertSimpleStructure(Utility.getArrayBaseComponentType(cls));
+			this.componentType = Utility.getArrayBaseComponentType(cls);
+			convertSimpleStructure(this.componentType);
 			if (this.rDataTypeCode != RdataTypeCode.UNSUPPORTED)
 				return this.getRdataCompositeCode();
 			/*
 			 * Handle array as a collection.
 			 */
+			this.componentType = null;
 			this.dimensions = null;
 			this.value = Arrays.asList((Object[]) value);
 			convertCollection();
@@ -1623,6 +1705,7 @@ public class JavaToR {
 		if (rDataUserDefinedCode < 0x01000000)
 			throw new RuntimeException("User defined data codes are between 0x01000000 and 0x7FFFFFFF.");
 		this.arrayOrder = ArrayOrder.ROW_MAJOR;
+		this.componentType = null;
 		this.dimensions = null;
 		this.isNamedListOfScalars = false;
 		this.rDataExceptionCode = RdataExceptionCode.NONE;
@@ -1640,6 +1723,7 @@ public class JavaToR {
 	 */
 	public int initializeFrom(JavaToR j2r) {
 		this.arrayOrder = j2r.arrayOrder;
+		this.componentType = j2r.componentType;
 		this.dimensions = j2r.dimensions;
 		this.isNamedListOfScalars = j2r.isNamedListOfScalars;
 		this.rDataExceptionCode = j2r.rDataExceptionCode;

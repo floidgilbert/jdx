@@ -30,7 +30,7 @@ A character vector of length one specifying the indexing order for n-dimensional
 }
 
 \details{
-The \code{\link{convertToR}} function is not thread-safe. Do not simultaneously call \code{\link{convertToR}} from different threads in the same process. See the R documentation for \code{\link{convertToRlowLevel}} for a thread-safe alternative.
+The \code{\link{convertToR}} function is not thread-safe. Do not simultaneously call \code{\link{convertToR}} from different threads in the same process. A thread-safe alternative is presented in the R documentation for \code{\link{convertToRlowLevel}}.
 
 The \href{../doc/Introduction.html}{vignette} contains all documentation for \code{\link{convertToR}} and its inverse function \code{\link{convertToJava}}. Note that these functions are not always perfect inverses of each other because some data structures cannot be reproduced exactly in the destination environment.
 }

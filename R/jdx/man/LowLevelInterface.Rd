@@ -10,7 +10,7 @@ Low-level Interface for jdx
 }
 
 \description{
-The functions listed here are the low-level interface for \CRANpkg{jdx} and are primarily used behind the scenes in \CRANpkg{jsr223}, the high-level integration package for Java. However, these functions may be used by \CRANpkg{rJava} developers interested in a thread-safe alternative to \code{\link{convertToR}}. See the code examples for a brief outline. If multi-threaded access is not required, please use the high-level \pkg{jdx} interface \code{\link{convertToJava}}.
+The functions listed here are the low-level interface for \CRANpkg{jdx} and are primarily used behind the scenes in \CRANpkg{jsr223}, the high-level integration package for Java. However, these functions may also be useful for \CRANpkg{rJava} developers interested in a thread-safe alternative to \code{\link{convertToR}}. See the code examples for a brief outline. If multi-threaded access is not required, please use \code{\link{convertToR}}.
 }
 
 \usage{
@@ -63,7 +63,7 @@ A logical value indicating whether to raise a specific warning.
 }
 
 \details{
-See the sample code below for a thread-safe alternative to \code{\link{javaToR}}. The details of each function are not included here whereas the high-level interface is recommended for most applications.
+See the code examples for a thread-safe alternative to \code{\link{javaToR}}.
 }
 
 \seealso{
@@ -81,12 +81,13 @@ library("jdx")
 # 
 # It is also possible to create and use the JavaToR
 # object in Java and return a reference to R via rJava.
-j2r <- jdx::createJavaToRobject()
+j2r <- createJavaToRobject()
 
 # Pass the Java object to be converted to the initialize 
 # method of the JavaToR object. Note that the Java object
 # must be cast as java.lang.Object. The initialize method
-# returns an integer value known as a composite data code.
+# returns an integer value known as a composite data code
+# that is used to derive the R structure.
 composite.data.code <- rJava::.jcall(
   j2r
   , "I"
@@ -95,7 +96,8 @@ composite.data.code <- rJava::.jcall(
 )
 
 # Process the resulting composite data code to get a data
-# code vector. This step also raises errors/warnings.
+# code vector. This step also raises any applicable 
+# errors/warnings.
 data.code <- processCompositeDataCode(j2r, composite.data.code)
 
 # Pass the JavaToR object and the data code to
@@ -105,11 +107,12 @@ convertToRlowLevel(j2r, data.code, strings.as.factors = FALSE)
 # When converting n-dimensional arrays, pass an array 
 # ordering constant to the initialize method.
 array.order.constants <- jdxConstants()$ARRAY_ORDER
+array <- convertToJava(as.matrix(iris[1:4]), array.order = "column-major")
 composite.data.code <- rJava::.jcall(
   j2r
   , "I"
   , "initialize"
-  , rJava::.jcast(convertToJava(as.matrix(iris[1:4]), array.order = "column-major"))
+  , rJava::.jcast(array)
   , array.order.constants[["column-major"]]
 )
 data.code <- processCompositeDataCode(j2r, composite.data.code)

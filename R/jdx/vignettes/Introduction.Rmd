@@ -59,7 +59,7 @@ identical(m1, m2)
 
 The jdx package provides a single function, `convertToJava()`, to handle conversion for all R objects. This design facilitates dynamically-typed programming. Consider, for example, an overloaded Java method `setValue()` that has different method signatures for a wide variety of data types and structures. If we use `rJava::.jcall(object, "V", "setValue", convertToJava(value))` to call `setValue()`, the Java method with the correct signature is automatically selected based on the return value of `convertToJava()`.
 
-**IMPORTANT:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. See the R documentation for `convertToRlowLevel()` for a thread-safe alternative.
+**IMPORTANT:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
 
 The `convertToJava()` function provides several data conversion parameters:
 
