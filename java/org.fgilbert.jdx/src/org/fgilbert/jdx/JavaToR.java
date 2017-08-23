@@ -619,111 +619,143 @@ public class JavaToR {
 	}
 	
 	///move this elsewhere
-	private Object coerceArrayND(Object array, Class<?> componentTypeSource, Class<?> componentTypeTarget) {
-		
-		if (double.class.equals(componentTypeTarget)) {
+	// Called only from convertCollectionToArrayND()
+	private Object coerceArrayND(Object sourceArray, int[] sourceDimensions, int sourceDataTypeCodeInt, int targetDataTypeCodeInt) {
+		Object targetArray = null;
+		int subarrayCount = sourceDimensions[0];
+		for (int i = 1; i < sourceDimensions.length - 1; i++)
+			subarrayCount *= sourceDimensions[i];
+		int subarrayLength = sourceDimensions[sourceDimensions.length - 1];
+		int[] currentSubarrayIndex = new int[sourceDimensions.length]; 
+		if (targetDataTypeCodeInt == RdataTypeCode.NUMERIC.value) {
+			targetArray = Array.newInstance(double.class, sourceDimensions);
+			for (int i = 0; i < subarrayCount; i++) {
+				Object o = array;
+				for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
+					o = Array.get(o, currentSubarrayIndex[j]);
+				int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
+				for (int j = 0; j < subarrayLength; j++)
+					subarray[j] = data[currentDataIndex++];
+				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+					if (currentSubarrayIndex[j] < sourceDimensions[j] - 1) {
+						currentSubarrayIndex[j]++;
+						break;
+					}
+					currentSubarrayIndex[j] = 0;
+				}
+			}
+
 			
-		}
-		switch(maybeNdimensionalArray.getTypeCode()) {
-		case NUMERIC:
-			double[][] d = new double[objects.length][];
-			for (int i = 0; i < objects.length; i++) {
-				/*
-				 * It is possible to get a mix of double[], int[], and byte[] sub-arrays.
-				 * Convert all to double[].
-				 * 
-				 * All arrays have been unboxed by this point.
-				 */
-				Class<?> ct = objects[i].getClass().getComponentType(); 
-				if (ct.equals(Double.TYPE)) {
-					d[i] = (double[]) objects[i];
-				} else if (ct.equals(Integer.TYPE)) {
-					d[i] = Arrays.stream((int[]) objects[i]).asDoubleStream().toArray();
-				} else if (ct.equals(Byte.TYPE)) {
-					byte[] b = (byte[]) objects[i];
-					double[] subarray = new double[b.length];
-					for (int j = 0; j < subarray.length; j++)
-						subarray[j] = (double) b[j];
-					d[i] = subarray;
-				} else {
-					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
+			
+			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
+				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
+					currentSubarrayIndex[j]++;
+					break;
 				}
+				currentSubarrayIndex[j] = 0;
 			}
-			this.value = d;
-			this.rDataTypeCode = RdataTypeCode.NUMERIC;
-			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-			return;
-		case INTEGER:
-			int[][] n = new int[objects.length][];
-			for (int i = 0; i < objects.length; i++) {
-				/*
-				 * It is possible to get a mix of int[], and byte[] sub-arrays.
-				 * Convert all to int[].
-				 * 
-				 * All arrays have been unboxed by this point.
-				 */
-				Class<?> ct = objects[i].getClass().getComponentType(); 
-				if (ct.equals(Integer.TYPE)) {
-					n[i] = (int[]) objects[i];
-				} else if (ct.equals(Byte.TYPE)) {
-					byte[] b = (byte[]) objects[i];
-					int[] subarray = new int[b.length];
-					for (int j = 0; j < subarray.length; j++)
-						subarray[j] = (int) b[j];
-					n[i] = subarray;
-				} else {
-					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
-				}
-			}
-			this.value = n;
-			this.rDataTypeCode = RdataTypeCode.INTEGER;
-			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-			return;
-		case CHARACTER:
-			String[][] s = new String[objects.length][];
-			for (int i = 0; i < objects.length; i++) {
-				s[i] = (String[]) objects[i];
-			}
-			this.value = s;
-			this.rDataTypeCode = RdataTypeCode.CHARACTER;
-			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-			return;
-		case LOGICAL:
-			boolean[][] z = new boolean[objects.length][];
-			for (int i = 0; i < objects.length; i++) {
-				// All arrays have been unboxed by this point. 
-				z[i] = (boolean[]) objects[i];
-			}
-			this.value = z;
-			this.rDataTypeCode = RdataTypeCode.LOGICAL;
-			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-			return;
-		case RAW:
-			byte[][] b = new byte[objects.length][];
-			for (int i = 0; i < objects.length; i++) {
-				// All arrays have been unboxed by this point. 
-				b[i] = (byte[]) objects[i];
-			}
-			this.value = b;
-			this.rDataTypeCode = RdataTypeCode.RAW;
-			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-			return;
-		default:
-			throw new RuntimeException(String.format("The R data type 0x%X is not supported for an n-dimensional array.", maybeNdimensionalArray.getTypeCode().value));
 		}
-		return null;
+		return targetArray;
+		
+		
+//		switch(maybeNdimensionalArray.getTypeCode()) {
+//		case NUMERIC:
+//			double[][] d = new double[objects.length][];
+//			for (int i = 0; i < objects.length; i++) {
+//				/*
+//				 * It is possible to get a mix of double[], int[], and byte[] sub-arrays.
+//				 * Convert all to double[].
+//				 * 
+//				 * All arrays have been unboxed by this point.
+//				 */
+//				Class<?> ct = objects[i].getClass().getComponentType(); 
+//				if (ct.equals(Double.TYPE)) {
+//					d[i] = (double[]) objects[i];
+//				} else if (ct.equals(Integer.TYPE)) {
+//					d[i] = Arrays.stream((int[]) objects[i]).asDoubleStream().toArray();
+//				} else if (ct.equals(Byte.TYPE)) {
+//					byte[] b = (byte[]) objects[i];
+//					double[] subarray = new double[b.length];
+//					for (int j = 0; j < subarray.length; j++)
+//						subarray[j] = (double) b[j];
+//					d[i] = subarray;
+//				} else {
+//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
+//				}
+//			}
+//			this.value = d;
+//			this.rDataTypeCode = RdataTypeCode.NUMERIC;
+//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+//			return;
+//		case INTEGER:
+//			int[][] n = new int[objects.length][];
+//			for (int i = 0; i < objects.length; i++) {
+//				/*
+//				 * It is possible to get a mix of int[], and byte[] sub-arrays.
+//				 * Convert all to int[].
+//				 * 
+//				 * All arrays have been unboxed by this point.
+//				 */
+//				Class<?> ct = objects[i].getClass().getComponentType(); 
+//				if (ct.equals(Integer.TYPE)) {
+//					n[i] = (int[]) objects[i];
+//				} else if (ct.equals(Byte.TYPE)) {
+//					byte[] b = (byte[]) objects[i];
+//					int[] subarray = new int[b.length];
+//					for (int j = 0; j < subarray.length; j++)
+//						subarray[j] = (int) b[j];
+//					n[i] = subarray;
+//				} else {
+//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
+//				}
+//			}
+//			this.value = n;
+//			this.rDataTypeCode = RdataTypeCode.INTEGER;
+//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+//			return;
+//		case CHARACTER:
+//			String[][] s = new String[objects.length][];
+//			for (int i = 0; i < objects.length; i++) {
+//				s[i] = (String[]) objects[i];
+//			}
+//			this.value = s;
+//			this.rDataTypeCode = RdataTypeCode.CHARACTER;
+//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+//			return;
+//		case LOGICAL:
+//			boolean[][] z = new boolean[objects.length][];
+//			for (int i = 0; i < objects.length; i++) {
+//				// All arrays have been unboxed by this point. 
+//				z[i] = (boolean[]) objects[i];
+//			}
+//			this.value = z;
+//			this.rDataTypeCode = RdataTypeCode.LOGICAL;
+//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+//			return;
+//		case RAW:
+//			byte[][] b = new byte[objects.length][];
+//			for (int i = 0; i < objects.length; i++) {
+//				// All arrays have been unboxed by this point. 
+//				b[i] = (byte[]) objects[i];
+//			}
+//			this.value = b;
+//			this.rDataTypeCode = RdataTypeCode.RAW;
+//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+//			return;
+//		default:
+//			throw new RuntimeException(String.format("The R data type 0x%X is not supported for an n-dimensional array.", maybeNdimensionalArray.getTypeCode().value));
+//		}
+//		return null;
 	}
 
 	// This function is called only from within convertCollection.
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
-		///remove datatypecodetojavaclass stuff and just use inttypecodes.
 		int[] subarrayDimensions = maybeNdimensionalArray.getDimensions();
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
 		newDimensions[0] = objects.length;
 		for (int i = 0; i < subarrayDimensions.length; i++)
 			newDimensions[i + 1] = subarrayDimensions[i];
 		int sourceDataTypeCodeInt;
-		Class<?> sourceClass = null;
 		int targetDataTypeCodeInt = maybeNdimensionalArray.getTypeCode().value;
 		Class<?> targetClass = dataTypeCodeToJavaClass(maybeNdimensionalArray.getTypeCode());
 		Object array = Array.newInstance(targetClass, newDimensions);
@@ -733,8 +765,7 @@ public class JavaToR {
 				if (sourceDataTypeCodeInt == targetDataTypeCodeInt) {
 					Array.set(array, i, objects[i]);
 				} else {
-					sourceClass = dataTypeCodeIntToJavaClass(sourceDataTypeCodeInt);
-					Array.set(array, i, coerceArrayND(objects[i], sourceClass, targetClass));
+					Array.set(array, i, coerceArrayND(objects[i], subarrayDimensions, sourceDataTypeCodeInt, targetDataTypeCodeInt));
 				}
 			}
 		} else {
@@ -1488,22 +1519,6 @@ public class JavaToR {
 		this.rDataTypeCode = RdataTypeCode.UNSUPPORTED;
 	}
 	
-	private Class<?> dataTypeCodeIntToJavaClass(int value) {
-		if (value == RdataTypeCode.NUMERIC.value) {
-			return double.class;
-		} else if (value == RdataTypeCode.INTEGER.value) {
-			return int.class;
-		} else if (value == RdataTypeCode.CHARACTER.value) {
-			return String.class;
-		} else if (value == RdataTypeCode.LOGICAL.value) {
-			return boolean.class;
-		} else if (value == RdataTypeCode.RAW.value) {
-			return byte.class;
-		} else {
-			throw new RuntimeException(String.format("The R data type code 0x%X does not correspond to a Java class.", value));
-		}
-	}
-
 	private Class<?> dataTypeCodeToJavaClass(RdataTypeCode value) {
 		switch (value) {
 		case NUMERIC:
@@ -1523,10 +1538,6 @@ public class JavaToR {
 
 	public ArrayOrder getArrayOrder() {
 		return arrayOrder;
-	}
-	
-	public Class<?> getComponentType() {
-		return componentType;
 	}
 	
 	public int[] getDimensions() {
