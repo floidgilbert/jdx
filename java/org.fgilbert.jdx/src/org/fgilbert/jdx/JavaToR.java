@@ -108,7 +108,6 @@ public class JavaToR {
 	 */
 	private class MaybeNdimensionalArray {
 
-		private Class<?> componentType;
 		private int[] dimensions;
 		private boolean typeChanged = false;
 		private RdataTypeCode typeCode;
@@ -125,13 +124,8 @@ public class JavaToR {
 			default:
 				return;
 			}
-			componentType = j2r.getComponentType(); ///don't do this here or in j2r. just use type codes. maybe create a function to translate back and forth between component type and type code.
 			dimensions = j2r.getDimensions();
 			typeCode = j2r.getRdataTypeCode();
-		}
-		
-		Class<?> getComponentType() {
-			return componentType;
 		}
 		
 		int[] getDimensions() {
@@ -171,14 +165,12 @@ public class JavaToR {
 					// Do nothing. Integer and raw arrays will be coerced to numeric.
 				} else if ((typeCode == RdataTypeCode.INTEGER || typeCode == RdataTypeCode.RAW) && j2r.getRdataTypeCode() == RdataTypeCode.NUMERIC) {
 					// Change type to numeric. Integer and raw arrays will be coerced to numeric.
-					componentType = double.class;
 					typeCode = RdataTypeCode.NUMERIC;
 					typeChanged = true;
 				} else if (typeCode == RdataTypeCode.INTEGER && j2r.getRdataTypeCode() == RdataTypeCode.RAW) {
 					// Do nothing. Raw arrays will be coerced to integer.
 				} else if (typeCode == RdataTypeCode.RAW && j2r.getRdataTypeCode() == RdataTypeCode.INTEGER) {
 					// Revert type to integer. Raw arrays will be coerced to integer.
-					componentType = int.class;
 					typeCode = RdataTypeCode.INTEGER;
 					typeChanged = true;
 				} else {
@@ -283,7 +275,6 @@ public class JavaToR {
 	 * expensive calls to create new object references in rJava.
 	 */
 	private ArrayOrder arrayOrder;
-	private Class<?> componentType; // Only valid for arrays or collections converted to an array.
 	private int[] dimensions;
 	private boolean isNamedListOfScalars; // Used to detect row major data frames.
 	private RdataExceptionCode rDataExceptionCode;
@@ -502,16 +493,16 @@ public class JavaToR {
 		Iterator<?> iter = col.iterator();
 		Object o = iter.next();
 		JavaToR j2r = new JavaToR(o, this.arrayOrder);
-		int[] types = new int[col.size()];
-		types[0] = j2r.getRdataCompositeCode();
+		int[] compositeTypes = new int[col.size()];
+		compositeTypes[0] = j2r.getRdataCompositeCode();
 		Object[] objects = new Object[col.size()];
 		objects[0] = j2r.getValueObject();
 
 		MaybeNdimensionalArray maybeNdimensionalArray = new MaybeNdimensionalArray(col.size(), j2r);
 		MaybeRowMajorDataFrame maybeRowMajorDataFrame = new MaybeRowMajorDataFrame(j2r);
-		for (int i = 1; i < types.length; i++) {
+		for (int i = 1; i < compositeTypes.length; i++) {
 			j2r = new JavaToR(iter.next(), this.arrayOrder);
-			types[i] = j2r.getRdataCompositeCode();
+			compositeTypes[i] = j2r.getRdataCompositeCode();
 			objects[i] = j2r.getValueObject();
 			if (maybeNdimensionalArray.getValue()){
 				maybeNdimensionalArray.update(j2r);
@@ -520,7 +511,7 @@ public class JavaToR {
 			}
 		}
 		if (maybeNdimensionalArray.getValue()) {
-			convertCollectionToArrayND(maybeNdimensionalArray, objects);
+			convertCollectionToArrayND(maybeNdimensionalArray, objects, compositeTypes);
 			return;
 		} else if (maybeRowMajorDataFrame.getValue()) {
 			convertCollectionToDataFrame(maybeRowMajorDataFrame, objects);
@@ -528,7 +519,7 @@ public class JavaToR {
 		}
 		this.rDataTypeCode = RdataTypeCode.OTHER;
 		this.rDataStructureCode = RdataStructureCode.LIST;
-		this.value = new Object[] {types, objects};
+		this.value = new Object[] {compositeTypes, objects};
 	}
 	
 	/*
@@ -588,7 +579,6 @@ public class JavaToR {
 		 * must be tested in this order (from general to specific).
 		 */
 		if (numericVector) {
-			this.componentType = double.class;
 			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.NUMERIC;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
@@ -596,7 +586,6 @@ public class JavaToR {
 			return true;
 		}
 		if (integerVector) {
-			this.componentType = int.class;
 			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.INTEGER;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
@@ -604,7 +593,6 @@ public class JavaToR {
 			return true;
 		}
 		if (rawVector) {
-			this.componentType = byte.class;
 			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.RAW;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
@@ -613,7 +601,6 @@ public class JavaToR {
 		}
 		// Character and Logical vectors are exclusive (they don't mix with other types).
 		if (characterVector) {
-			this.componentType = String.class;
 			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.CHARACTER;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
@@ -621,7 +608,6 @@ public class JavaToR {
 			return true;
 		}
 		if (logicalVector) {
-			this.componentType = boolean.class;
 			this.dimensions = new int[] {col.size()};
 			this.rDataTypeCode = RdataTypeCode.LOGICAL;
 			this.rDataStructureCode = RdataStructureCode.VECTOR;
@@ -729,29 +715,32 @@ public class JavaToR {
 	}
 
 	// This function is called only from within convertCollection.
-	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects) {
+	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
+		///remove datatypecodetojavaclass stuff and just use inttypecodes.
 		int[] subarrayDimensions = maybeNdimensionalArray.getDimensions();
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
 		newDimensions[0] = objects.length;
 		for (int i = 0; i < subarrayDimensions.length; i++)
 			newDimensions[i + 1] = subarrayDimensions[i];
-		Class<?> componentTypeSource = null;
-		Class<?> componentTypeTarget = maybeNdimensionalArray.getComponentType();
-		Object array = Array.newInstance(componentTypeTarget, newDimensions);
+		int sourceDataTypeCodeInt;
+		Class<?> sourceClass = null;
+		int targetDataTypeCodeInt = maybeNdimensionalArray.getTypeCode().value;
+		Class<?> targetClass = dataTypeCodeToJavaClass(maybeNdimensionalArray.getTypeCode());
+		Object array = Array.newInstance(targetClass, newDimensions);
 		if (maybeNdimensionalArray.getTypeChanged()) {
 			for (int i = 0; i < newDimensions.length; i++) {
-				componentTypeSource = Utility.getArrayBaseComponentType(objects[i].getClass());
-				if (!componentTypeSource.equals(componentTypeTarget)) {
-					Array.set(array, i, coerceArrayND(objects[i], componentTypeSource, componentTypeTarget));
-				} else {
+				sourceDataTypeCodeInt = compositeTypes[i] & 0xFF;
+				if (sourceDataTypeCodeInt == targetDataTypeCodeInt) {
 					Array.set(array, i, objects[i]);
+				} else {
+					sourceClass = dataTypeCodeIntToJavaClass(sourceDataTypeCodeInt);
+					Array.set(array, i, coerceArrayND(objects[i], sourceClass, targetClass));
 				}
 			}
 		} else {
 			for (int i = 0; i < this.dimensions.length; i++)
 				Array.set(array, i, objects[i]);
 		}
-		this.componentType = componentTypeTarget;
 		this.dimensions = newDimensions;
 		this.value = new Object[] {this.dimensions, array};
 		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
@@ -1499,6 +1488,39 @@ public class JavaToR {
 		this.rDataTypeCode = RdataTypeCode.UNSUPPORTED;
 	}
 	
+	private Class<?> dataTypeCodeIntToJavaClass(int value) {
+		if (value == RdataTypeCode.NUMERIC.value) {
+			return double.class;
+		} else if (value == RdataTypeCode.INTEGER.value) {
+			return int.class;
+		} else if (value == RdataTypeCode.CHARACTER.value) {
+			return String.class;
+		} else if (value == RdataTypeCode.LOGICAL.value) {
+			return boolean.class;
+		} else if (value == RdataTypeCode.RAW.value) {
+			return byte.class;
+		} else {
+			throw new RuntimeException(String.format("The R data type code 0x%X does not correspond to a Java class.", value));
+		}
+	}
+
+	private Class<?> dataTypeCodeToJavaClass(RdataTypeCode value) {
+		switch (value) {
+		case NUMERIC:
+			return double.class;
+		case INTEGER:
+			return int.class;
+		case CHARACTER:
+			return String.class;
+		case LOGICAL:
+			return boolean.class;
+		case RAW:
+			return byte.class;
+		default:
+			throw new RuntimeException(String.format("The R data type code 0x%X does not correspond to a Java class.", value.value));
+		}
+	}
+
 	public ArrayOrder getArrayOrder() {
 		return arrayOrder;
 	}
@@ -1594,7 +1616,6 @@ public class JavaToR {
 	 */
 	public int initialize(Object value, ArrayOrder arrayOrder) {
 		this.arrayOrder = arrayOrder;
-		this.componentType = null;
 		this.dimensions = null;
 		this.isNamedListOfScalars = false; // Used to detect row major data frames.
 		this.rDataExceptionCode = RdataExceptionCode.NONE;
@@ -1639,14 +1660,12 @@ public class JavaToR {
 			 * this.rDataTypeCode == RdataTypeCode.UNSUPPORTED then it is not a
 			 * simple type supported by R.
 			 */
-			this.componentType = Utility.getArrayBaseComponentType(cls);
-			convertSimpleStructure(this.componentType);
+			convertSimpleStructure(Utility.getArrayBaseComponentType(cls));
 			if (this.rDataTypeCode != RdataTypeCode.UNSUPPORTED)
 				return this.getRdataCompositeCode();
 			/*
 			 * Handle array as a collection.
 			 */
-			this.componentType = null;
 			this.dimensions = null;
 			this.value = Arrays.asList((Object[]) value);
 			convertCollection();
@@ -1705,7 +1724,6 @@ public class JavaToR {
 		if (rDataUserDefinedCode < 0x01000000)
 			throw new RuntimeException("User defined data codes are between 0x01000000 and 0x7FFFFFFF.");
 		this.arrayOrder = ArrayOrder.ROW_MAJOR;
-		this.componentType = null;
 		this.dimensions = null;
 		this.isNamedListOfScalars = false;
 		this.rDataExceptionCode = RdataExceptionCode.NONE;
@@ -1723,7 +1741,6 @@ public class JavaToR {
 	 */
 	public int initializeFrom(JavaToR j2r) {
 		this.arrayOrder = j2r.arrayOrder;
-		this.componentType = j2r.componentType;
 		this.dimensions = j2r.dimensions;
 		this.isNamedListOfScalars = j2r.isNamedListOfScalars;
 		this.rDataExceptionCode = j2r.rDataExceptionCode;
@@ -1733,7 +1750,7 @@ public class JavaToR {
 		this.value = j2r.value;
 		return this.getRdataCompositeCode();
 	}
-
+	
 	private boolean[] unboxArray1D(Boolean[] a) {
 		if (a == null)
 			return null;
