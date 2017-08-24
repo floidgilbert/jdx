@@ -618,162 +618,45 @@ public class JavaToR {
 		return false;
 	}
 	
-	///move this elsewhere
-	// Called only from convertCollectionToArrayND()
-	private Object coerceArrayND(Object sourceArray, int[] sourceDimensions, int sourceDataTypeCodeInt, int targetDataTypeCodeInt) {
-		Object targetArray = null;
-		int subarrayCount = sourceDimensions[0];
-		for (int i = 1; i < sourceDimensions.length - 1; i++)
-			subarrayCount *= sourceDimensions[i];
-		int subarrayLength = sourceDimensions[sourceDimensions.length - 1];
-		int[] currentSubarrayIndex = new int[sourceDimensions.length]; 
-		if (targetDataTypeCodeInt == RdataTypeCode.NUMERIC.value) {
-			targetArray = Array.newInstance(double.class, sourceDimensions);
-			for (int i = 0; i < subarrayCount; i++) {
-				Object o = array;
-				for (int j = 0; j < currentSubarrayIndex.length - 1; j++)
-					o = Array.get(o, currentSubarrayIndex[j]);
-				int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
-				for (int j = 0; j < subarrayLength; j++)
-					subarray[j] = data[currentDataIndex++];
-				for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-					if (currentSubarrayIndex[j] < sourceDimensions[j] - 1) {
-						currentSubarrayIndex[j]++;
-						break;
-					}
-					currentSubarrayIndex[j] = 0;
-				}
-			}
-
-			
-			
-			for (int j = currentSubarrayIndex.length - 1; j > -1; j--) {
-				if (currentSubarrayIndex[j] < dimensions[j] - 1) {
-					currentSubarrayIndex[j]++;
-					break;
-				}
-				currentSubarrayIndex[j] = 0;
-			}
-		}
-		return targetArray;
-		
-		
-//		switch(maybeNdimensionalArray.getTypeCode()) {
-//		case NUMERIC:
-//			double[][] d = new double[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				/*
-//				 * It is possible to get a mix of double[], int[], and byte[] sub-arrays.
-//				 * Convert all to double[].
-//				 * 
-//				 * All arrays have been unboxed by this point.
-//				 */
-//				Class<?> ct = objects[i].getClass().getComponentType(); 
-//				if (ct.equals(Double.TYPE)) {
-//					d[i] = (double[]) objects[i];
-//				} else if (ct.equals(Integer.TYPE)) {
-//					d[i] = Arrays.stream((int[]) objects[i]).asDoubleStream().toArray();
-//				} else if (ct.equals(Byte.TYPE)) {
-//					byte[] b = (byte[]) objects[i];
-//					double[] subarray = new double[b.length];
-//					for (int j = 0; j < subarray.length; j++)
-//						subarray[j] = (double) b[j];
-//					d[i] = subarray;
-//				} else {
-//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
-//				}
-//			}
-//			this.value = d;
-//			this.rDataTypeCode = RdataTypeCode.NUMERIC;
-//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-//			return;
-//		case INTEGER:
-//			int[][] n = new int[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				/*
-//				 * It is possible to get a mix of int[], and byte[] sub-arrays.
-//				 * Convert all to int[].
-//				 * 
-//				 * All arrays have been unboxed by this point.
-//				 */
-//				Class<?> ct = objects[i].getClass().getComponentType(); 
-//				if (ct.equals(Integer.TYPE)) {
-//					n[i] = (int[]) objects[i];
-//				} else if (ct.equals(Byte.TYPE)) {
-//					byte[] b = (byte[]) objects[i];
-//					int[] subarray = new int[b.length];
-//					for (int j = 0; j < subarray.length; j++)
-//						subarray[j] = (int) b[j];
-//					n[i] = subarray;
-//				} else {
-//					throw new RuntimeException(String.format("Java class '%s' is not supported for matrix subarray conversion.", ct.getName()));
-//				}
-//			}
-//			this.value = n;
-//			this.rDataTypeCode = RdataTypeCode.INTEGER;
-//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-//			return;
-//		case CHARACTER:
-//			String[][] s = new String[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				s[i] = (String[]) objects[i];
-//			}
-//			this.value = s;
-//			this.rDataTypeCode = RdataTypeCode.CHARACTER;
-//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-//			return;
-//		case LOGICAL:
-//			boolean[][] z = new boolean[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				// All arrays have been unboxed by this point. 
-//				z[i] = (boolean[]) objects[i];
-//			}
-//			this.value = z;
-//			this.rDataTypeCode = RdataTypeCode.LOGICAL;
-//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-//			return;
-//		case RAW:
-//			byte[][] b = new byte[objects.length][];
-//			for (int i = 0; i < objects.length; i++) {
-//				// All arrays have been unboxed by this point. 
-//				b[i] = (byte[]) objects[i];
-//			}
-//			this.value = b;
-//			this.rDataTypeCode = RdataTypeCode.RAW;
-//			this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
-//			return;
-//		default:
-//			throw new RuntimeException(String.format("The R data type 0x%X is not supported for an n-dimensional array.", maybeNdimensionalArray.getTypeCode().value));
-//		}
-//		return null;
-	}
-
 	// This function is called only from within convertCollection.
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		int[] subarrayDimensions = maybeNdimensionalArray.getDimensions();
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
 		newDimensions[0] = objects.length;
-		for (int i = 0; i < subarrayDimensions.length; i++)
+		int flatArrayLength = objects.length;
+		int[] flatArray = new int[flatArrayLength];
+		for (int i = 0; i < subarrayDimensions.length; i++) {
 			newDimensions[i + 1] = subarrayDimensions[i];
-		int sourceDataTypeCodeInt;
-		int targetDataTypeCodeInt = maybeNdimensionalArray.getTypeCode().value;
-		Class<?> targetClass = dataTypeCodeToJavaClass(maybeNdimensionalArray.getTypeCode());
-		Object array = Array.newInstance(targetClass, newDimensions);
-		if (maybeNdimensionalArray.getTypeChanged()) {
-			for (int i = 0; i < newDimensions.length; i++) {
-				sourceDataTypeCodeInt = compositeTypes[i] & 0xFF;
-				if (sourceDataTypeCodeInt == targetDataTypeCodeInt) {
-					Array.set(array, i, objects[i]);
-				} else {
-					Array.set(array, i, coerceArrayND(objects[i], subarrayDimensions, sourceDataTypeCodeInt, targetDataTypeCodeInt));
-				}
-			}
-		} else {
-			for (int i = 0; i < this.dimensions.length; i++)
-				Array.set(array, i, objects[i]);
+			flatArrayLength *= subarrayDimensions[i];
 		}
+		int flatArrayIndex = 0;
+		for (int i = 0; i < objects.length; i++) {
+			Object[] ndObject = (Object[]) objects[i];
+			int[] data = (int[]) ndObject[1];
+			for (int j = 0; j < data.length; j++)
+				flatArray[flatArrayIndex++] = data[j];
+		}
+
+		///
+//		int sourceDataTypeCodeInt;
+//		int targetDataTypeCodeInt = maybeNdimensionalArray.getTypeCode().value;
+//		Class<?> targetClass = dataTypeCodeToJavaClass(maybeNdimensionalArray.getTypeCode());
+//		Object array = Array.newInstance(targetClass, newDimensions);
+//		if (maybeNdimensionalArray.getTypeChanged()) {
+//			for (int i = 0; i < newDimensions.length; i++) {
+//				sourceDataTypeCodeInt = compositeTypes[i] & 0xFF;
+//				if (sourceDataTypeCodeInt == targetDataTypeCodeInt) {
+//					Array.set(array, i, objects[i]);
+//				} else {
+//					Array.set(array, i, coerceArrayND(objects[i], subarrayDimensions, sourceDataTypeCodeInt, targetDataTypeCodeInt));
+//				}
+//			}
+//		} else {
+//			for (int i = 0; i < this.dimensions.length; i++)
+//				Array.set(array, i, objects[i]);
+//		}
 		this.dimensions = newDimensions;
-		this.value = new Object[] {this.dimensions, array};
+		this.value = new Object[] {newDimensions, flatArray};
 		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
 		this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
 		return;
@@ -892,15 +775,15 @@ public class JavaToR {
 	}
 
 	private void convertNdimensionalBooleanArray() {
-		int flatLength = this.dimensions[0];
+		int flatArrayLength = this.dimensions[0];
 		for (int i = 1; i < this.dimensions.length; i++)
-			flatLength *= this.dimensions[i];
-		boolean[] flatArray = new boolean[flatLength];
+			flatArrayLength *= this.dimensions[i];
+		boolean[] flatArray = new boolean[flatArrayLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = this.dimensions[this.dimensions.length - 1];
 		int subarrayCount = 0;
 		if (subarrayLength != 0)
-			subarrayCount = flatLength / subarrayLength;
+			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
 		// These three variables are used only for ROW_MAJOR_JAVA
 		int rowCount = this.dimensions[this.dimensions.length - 2];
@@ -979,15 +862,15 @@ public class JavaToR {
 	}
 	
 	private void convertNdimensionalByteArray() {
-		int flatLength = this.dimensions[0];
+		int flatArrayLength = this.dimensions[0];
 		for (int i = 1; i < this.dimensions.length; i++)
-			flatLength *= this.dimensions[i];
-		byte[] flatArray = new byte[flatLength];
+			flatArrayLength *= this.dimensions[i];
+		byte[] flatArray = new byte[flatArrayLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = this.dimensions[this.dimensions.length - 1];
 		int subarrayCount = 0;
 		if (subarrayLength != 0)
-			subarrayCount = flatLength / subarrayLength;
+			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
 		// These three variables are used only for ROW_MAJOR_JAVA
 		int rowCount = this.dimensions[this.dimensions.length - 2];
@@ -1066,15 +949,15 @@ public class JavaToR {
 	}
 	
 	private void convertNdimensionalDoubleArray() {
-		int flatLength = this.dimensions[0];
+		int flatArrayLength = this.dimensions[0];
 		for (int i = 1; i < this.dimensions.length; i++)
-			flatLength *= this.dimensions[i];
-		double[] flatArray = new double[flatLength];
+			flatArrayLength *= this.dimensions[i];
+		double[] flatArray = new double[flatArrayLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = this.dimensions[this.dimensions.length - 1];
 		int subarrayCount = 0;
 		if (subarrayLength != 0)
-			subarrayCount = flatLength / subarrayLength;
+			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
 		// These three variables are used only for ROW_MAJOR_JAVA
 		int rowCount = this.dimensions[this.dimensions.length - 2];
@@ -1153,15 +1036,15 @@ public class JavaToR {
 	}
 	
 	private void convertNdimensionalIntArray() {
-		int flatLength = this.dimensions[0];
+		int flatArrayLength = this.dimensions[0];
 		for (int i = 1; i < this.dimensions.length; i++)
-			flatLength *= this.dimensions[i];
-		int[] flatArray = new int[flatLength];
+			flatArrayLength *= this.dimensions[i];
+		int[] flatArray = new int[flatArrayLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = this.dimensions[this.dimensions.length - 1];
 		int subarrayCount = 0;
 		if (subarrayLength != 0)
-			subarrayCount = flatLength / subarrayLength;
+			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
 		// These three variables are used only for ROW_MAJOR_JAVA
 		int rowCount = this.dimensions[this.dimensions.length - 2];
@@ -1240,15 +1123,15 @@ public class JavaToR {
 	}
 	
 	private void convertNdimensionalStringArray() {
-		int flatLength = this.dimensions[0];
+		int flatArrayLength = this.dimensions[0];
 		for (int i = 1; i < this.dimensions.length; i++)
-			flatLength *= this.dimensions[i];
-		String[] flatArray = new String[flatLength];
+			flatArrayLength *= this.dimensions[i];
+		String[] flatArray = new String[flatArrayLength];
 		int currentFlatArrayIndex = 0;
 		int subarrayLength = this.dimensions[this.dimensions.length - 1];
 		int subarrayCount = 0;
 		if (subarrayLength != 0)
-			subarrayCount = flatLength / subarrayLength;
+			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
 		// These three variables are used only for ROW_MAJOR_JAVA
 		int rowCount = this.dimensions[this.dimensions.length - 2];
