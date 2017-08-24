@@ -473,7 +473,6 @@ public class JavaToR {
 	 * objects/values will be converted to unnamed lists.
 	 */
 	private void convertCollection() {
-		///remember to set this.dimensions when converting to n-dimensional array. or even one-dimensional for that matter.
 		Collection<?> col = (Collection<?>) this.value;
 		if (col.isEmpty()) {
 			// Return empty list.
@@ -624,39 +623,41 @@ public class JavaToR {
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
 		newDimensions[0] = objects.length;
 		int flatArrayLength = objects.length;
-		int[] flatArray = new int[flatArrayLength];
 		for (int i = 0; i < subarrayDimensions.length; i++) {
 			newDimensions[i + 1] = subarrayDimensions[i];
 			flatArrayLength *= subarrayDimensions[i];
 		}
+		int[] flatArray = new int[flatArrayLength];
 		int flatArrayIndex = 0;
-		for (int i = 0; i < objects.length; i++) {
-			Object[] ndObject = (Object[]) objects[i];
-			int[] data = (int[]) ndObject[1];
-			for (int j = 0; j < data.length; j++)
-				flatArray[flatArrayIndex++] = data[j];
+		if (subarrayDimensions.length == 1) {
+			for (int i = 0; i < objects.length; i++) {
+				int[] data = (int[]) objects[i];
+				for (int j = 0; j < data.length; j++)
+					flatArray[flatArrayIndex++] = data[j];
+			}
+		} else {
+			for (int i = 0; i < objects.length; i++) {
+				Object[] ndObject = (Object[]) objects[i];
+				int[] data = (int[]) ndObject[1];
+				for (int j = 0; j < data.length; j++)
+					flatArray[flatArrayIndex++] = data[j];
+			}
 		}
-
-		///
-//		int sourceDataTypeCodeInt;
-//		int targetDataTypeCodeInt = maybeNdimensionalArray.getTypeCode().value;
-//		Class<?> targetClass = dataTypeCodeToJavaClass(maybeNdimensionalArray.getTypeCode());
-//		Object array = Array.newInstance(targetClass, newDimensions);
-//		if (maybeNdimensionalArray.getTypeChanged()) {
-//			for (int i = 0; i < newDimensions.length; i++) {
-//				sourceDataTypeCodeInt = compositeTypes[i] & 0xFF;
-//				if (sourceDataTypeCodeInt == targetDataTypeCodeInt) {
-//					Array.set(array, i, objects[i]);
-//				} else {
-//					Array.set(array, i, coerceArrayND(objects[i], subarrayDimensions, sourceDataTypeCodeInt, targetDataTypeCodeInt));
-//				}
-//			}
-//		} else {
-//			for (int i = 0; i < this.dimensions.length; i++)
-//				Array.set(array, i, objects[i]);
-//		}
 		this.dimensions = newDimensions;
-		this.value = new Object[] {newDimensions, flatArray};
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+			break;
+		case COLUMN_MAJOR:
+			Utility.reverseArray(this.dimensions);
+			break;
+		case ROW_MAJOR_JAVA:
+			int swap = this.dimensions[this.dimensions.length - 1];
+			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
+			this.dimensions[this.dimensions.length - 2] = swap;
+			Utility.reverseArray(this.dimensions);
+			break;
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
 		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
 		this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
 		return;
@@ -1402,23 +1403,6 @@ public class JavaToR {
 		this.rDataTypeCode = RdataTypeCode.UNSUPPORTED;
 	}
 	
-	private Class<?> dataTypeCodeToJavaClass(RdataTypeCode value) {
-		switch (value) {
-		case NUMERIC:
-			return double.class;
-		case INTEGER:
-			return int.class;
-		case CHARACTER:
-			return String.class;
-		case LOGICAL:
-			return boolean.class;
-		case RAW:
-			return byte.class;
-		default:
-			throw new RuntimeException(String.format("The R data type code 0x%X does not correspond to a Java class.", value.value));
-		}
-	}
-
 	public ArrayOrder getArrayOrder() {
 		return arrayOrder;
 	}
