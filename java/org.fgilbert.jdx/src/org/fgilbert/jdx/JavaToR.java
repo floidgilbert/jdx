@@ -624,6 +624,7 @@ public class JavaToR {
 	}
 
 	// This function is called only from within convertCollection.
+	////does this function and the next one appropriately inherit warnings/exceptions?
 	private void convertCollectionToArray2D(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		/*
 		 * Set matrix dimensions.
