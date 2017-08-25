@@ -1,6 +1,7 @@
 package org.fgilbert.jdx;
 
 ///re-read all comments now that we support n-dimensional arrays. remove comments about matrices
+///use System.arraycopy(src, srcPos, dest, destPos, length);
 
 /*
  * This class was written to optimize marshalling data between the JVM and R via rJava. 
@@ -108,7 +109,7 @@ public class JavaToR {
 	 */
 	private class MaybeNdimensionalArray {
 
-		private int[] dimensions;
+		private int[] subarrayDimensions;
 		private boolean typeChanged = false;
 		private RdataTypeCode typeCode;
 		private boolean value = false;
@@ -124,18 +125,19 @@ public class JavaToR {
 			default:
 				return;
 			}
-			dimensions = j2r.getDimensions();
+			subarrayDimensions = j2r.getDimensions();
 			typeCode = j2r.getRdataTypeCode();
 		}
 		
-		int[] getDimensions() {
-			return dimensions;
-		}
-		
+		///remove if not used.
 		boolean getTypeChanged() {
 			return typeChanged;
 		}
 
+		int[] getSubarrayDimensions() {
+			return subarrayDimensions;
+		}
+		
 		RdataTypeCode getTypeCode() {
 			return typeCode;
 		}
@@ -150,7 +152,7 @@ public class JavaToR {
 			switch (j2r.getRdataStructureCode()) {
 			case VECTOR:
 			case ND_ARRAY:
-				value = Arrays.equals(dimensions, j2r.dimensions);
+				value = Arrays.equals(subarrayDimensions, j2r.getDimensions());
 				break;
 			default:
 				value = false;
@@ -503,14 +505,18 @@ public class JavaToR {
 			j2r = new JavaToR(iter.next(), this.arrayOrder);
 			compositeTypes[i] = j2r.getRdataCompositeCode();
 			objects[i] = j2r.getValueObject();
-			if (maybeNdimensionalArray.getValue()){
+			if (maybeNdimensionalArray.getValue()) {
 				maybeNdimensionalArray.update(j2r);
 			} else if (maybeRowMajorDataFrame.getValue()) {
 				maybeRowMajorDataFrame.update(j2r);
 			}
 		}
 		if (maybeNdimensionalArray.getValue()) {
-			convertCollectionToArrayND(maybeNdimensionalArray, objects, compositeTypes);
+			if (maybeNdimensionalArray.getSubarrayDimensions().length == 1) {
+				convertCollectionToArray2D(maybeNdimensionalArray, objects, compositeTypes);				
+			} else {
+				convertCollectionToArrayND(maybeNdimensionalArray, objects, compositeTypes);				
+			}
 			return;
 		} else if (maybeRowMajorDataFrame.getValue()) {
 			convertCollectionToDataFrame(maybeRowMajorDataFrame, objects);
@@ -616,10 +622,203 @@ public class JavaToR {
 		// The collection contains only nulls.
 		return false;
 	}
+
+	// This function is called only from within convertCollection.
+	private void convertCollectionToArray2D(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
+		/*
+		 * Set matrix dimensions.
+		 */
+		int subarrayLength = maybeNdimensionalArray.getSubarrayDimensions()[0];
+		switch (this.arrayOrder) {
+		case ROW_MAJOR:
+		case ROW_MAJOR_JAVA:
+			this.dimensions = new int[] {objects.length, subarrayLength};
+			break;
+		case COLUMN_MAJOR:
+			this.dimensions = new int[] {subarrayLength, objects.length};
+			break;
+		}
+		
+		/*
+		 * Initialize variables used in conversion.
+		 */
+		Object flatArray = null;
+		int flatArrayLength = objects.length * subarrayLength;
+		int dataTypeCodeInt;
+		int[] subarrayInt; double[] subarrayDouble; byte[] subarrayByte;
+		boolean[] subarrayBoolean; String[] subarrayString;
+		
+		/*
+		 * Convert collection based on the target matrix type.
+		 */
+		switch (maybeNdimensionalArray.getTypeCode()) {
+		case NUMERIC:
+			double[] flatArrayDouble = new double[flatArrayLength];
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+			case ROW_MAJOR_JAVA:
+				int rows = objects.length;
+				for (int i = 0; i < rows; i++) {
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.NUMERIC.value) {
+						subarrayDouble = (double[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[i + j * rows] = subarrayDouble[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+							subarrayInt = (int[]) objects[i];
+							for (int j = 0; j < subarrayLength; j++)
+								flatArrayDouble[i + j * rows] = (double) subarrayInt[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						subarrayByte = (byte[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[i + j * rows] = (double) subarrayByte[j];
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to a numeric matrix.", dataTypeCodeInt));
+					}
+				}
+				break;
+			case COLUMN_MAJOR:
+				int flatArrayIndex = 0;
+				for (int i = 0; i < objects.length; i++) {
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.NUMERIC.value) {
+						subarrayDouble = (double[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[flatArrayIndex++] = subarrayDouble[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+						subarrayInt = (int[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[flatArrayIndex++] = (double) subarrayInt[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						subarrayByte = (byte[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[flatArrayIndex++] = (double) subarrayByte[j];
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to a numeric matrix.", dataTypeCodeInt));
+					}
+				}
+			}
+			flatArray = flatArrayDouble;
+			break;
+		case INTEGER:
+			int[] flatArrayInt = new int[flatArrayLength];
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+			case ROW_MAJOR_JAVA:
+				int rows = objects.length;
+				for (int i = 0; i < rows; i++) {
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+						subarrayInt = (int[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayInt[i + j * rows] = subarrayInt[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						subarrayByte = (byte[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayInt[i + j * rows] = (int) subarrayByte[j];
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to an integer matrix.", dataTypeCodeInt));
+					}
+				}
+				break;
+			case COLUMN_MAJOR:
+				int flatArrayIndex = 0;
+				for (int i = 0; i < objects.length; i++) {
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+						subarrayInt = (int[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayInt[flatArrayIndex++] = subarrayInt[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						subarrayByte = (byte[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayInt[flatArrayIndex++] = (int) subarrayByte[j];
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to an integer matrix.", dataTypeCodeInt));
+					}
+				}
+			}
+			flatArray = flatArrayInt;
+			break;
+		case CHARACTER:
+			String[] flatArrayString = new String[flatArrayLength];
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+			case ROW_MAJOR_JAVA:
+				int rows = objects.length;
+				for (int i = 0; i < rows; i++) {
+					subarrayString = (String[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayString[i + j * rows] = subarrayString[j];
+				}
+				break;
+			case COLUMN_MAJOR:
+				int flatArrayIndex = 0;
+				for (int i = 0; i < objects.length; i++) {
+					subarrayString = (String[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayString[flatArrayIndex++] = subarrayString[j];
+				}
+			}
+			flatArray = flatArrayString;
+			break;
+		case LOGICAL:
+			boolean[] flatArrayBoolean = new boolean[flatArrayLength];
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+			case ROW_MAJOR_JAVA:
+				int rows = objects.length;
+				for (int i = 0; i < rows; i++) {
+					subarrayBoolean = (boolean[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayBoolean[i + j * rows] = subarrayBoolean[j];
+				}
+				break;
+			case COLUMN_MAJOR:
+				int flatArrayIndex = 0;
+				for (int i = 0; i < objects.length; i++) {
+					subarrayBoolean = (boolean[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayBoolean[flatArrayIndex++] = subarrayBoolean[j];
+				}
+			}
+			flatArray = flatArrayBoolean;
+			break;
+		case RAW:
+			byte[] flatArrayByte = new byte[flatArrayLength];
+			switch (this.arrayOrder) {
+			case ROW_MAJOR:
+			case ROW_MAJOR_JAVA:
+				int rows = objects.length;
+				for (int i = 0; i < rows; i++) {
+					subarrayByte = (byte[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayByte[i + j * rows] = subarrayByte[j];
+				}
+				break;
+			case COLUMN_MAJOR:
+				int flatArrayIndex = 0;
+				for (int i = 0; i < objects.length; i++) {
+					subarrayByte = (byte[]) objects[i];
+					for (int j = 0; j < subarrayLength; j++)
+						flatArrayByte[flatArrayIndex++] = subarrayByte[j];
+				}
+			}
+			flatArray = flatArrayByte;
+			break;
+		default:
+			throw new RuntimeException(String.format("The R data type code %s is unsupported when converting collections to matrices.", maybeNdimensionalArray.getTypeCode()));
+		}
+		this.value = new Object[] {this.dimensions, flatArray};
+		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
+		this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
+		return;
+	}
 	
 	// This function is called only from within convertCollection.
+	///use or delete compositeTypes
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
-		int[] subarrayDimensions = maybeNdimensionalArray.getDimensions();
+		int[] subarrayDimensions = maybeNdimensionalArray.getSubarrayDimensions();
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
 		newDimensions[0] = objects.length;
 		int flatArrayLength = objects.length;
