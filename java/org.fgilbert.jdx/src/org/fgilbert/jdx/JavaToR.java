@@ -666,9 +666,9 @@ public class JavaToR {
 						for (int j = 0; j < subarrayLength; j++)
 							flatArrayDouble[i + j * rows] = subarrayDouble[j];
 					} else if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
-							subarrayInt = (int[]) objects[i];
-							for (int j = 0; j < subarrayLength; j++)
-								flatArrayDouble[i + j * rows] = (double) subarrayInt[j];
+						subarrayInt = (int[]) objects[i];
+						for (int j = 0; j < subarrayLength; j++)
+							flatArrayDouble[i + j * rows] = (double) subarrayInt[j];
 					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
 						subarrayByte = (byte[]) objects[i];
 						for (int j = 0; j < subarrayLength; j++)
@@ -817,7 +817,6 @@ public class JavaToR {
 	}
 	
 	// This function is called only from within convertCollection.
-	///use or delete compositeTypes
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		int[] subarrayDimensions = maybeNdimensionalArray.getSubarrayDimensions();
 		int[] newDimensions = new int[subarrayDimensions.length + 1];
