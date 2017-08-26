@@ -278,10 +278,6 @@ public class Utility {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			boolean[] subarray = (boolean[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				/*
-				 *  The offset is the same as subarrayCount because of the way the data structure fills
-				 *  to mimic R's indexing scheme. Step through it to see how it works.
-				 */
 				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -318,10 +314,6 @@ public class Utility {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			byte[] subarray = (byte[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				/*
-				 *  The offset is the same as subarrayCount because of the way the data structure fills
-				 *  to mimic R's indexing scheme. Step through it to see how it works.
-				 */
 				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -358,10 +350,6 @@ public class Utility {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			double[] subarray = (double[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				/*
-				 *  The offset is the same as subarrayCount because of the way the data structure fills
-				 *  to mimic R's indexing scheme. Step through it to see how it works.
-				 */
 				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -398,10 +386,6 @@ public class Utility {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			int[] subarray = (int[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				/*
-				 *  The offset is the same as subarrayCount because of the way the data structure fills
-				 *  to mimic R's indexing scheme. Step through it to see how it works.
-				 */
 				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -438,10 +422,6 @@ public class Utility {
 				o = Array.get(o, currentSubarrayIndex[j]);
 			String[] subarray = (String[]) Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]);			
 			for (int j = 0; j < subarrayLength; j++)
-				/*
-				 *  The offset is the same as subarrayCount because of the way the data structure fills
-				 *  to mimic R's indexing scheme. Step through it to see how it works.
-				 */
 				subarray[j] = data[currentDataIndex + subarrayCount * j];
 			currentDataIndex++; 
 			for (int j = 0; j < currentSubarrayIndex.length; j++) {

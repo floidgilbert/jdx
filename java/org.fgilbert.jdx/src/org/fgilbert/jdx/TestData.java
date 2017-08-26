@@ -897,8 +897,12 @@ public class TestData {
 		return new Boolean[][] {{false, true}, {true, false}};
 	}
 
-	public static Boolean[][] getBoxedBooleanArray2dNulls() {
+	public static Boolean[][] getBoxedBooleanArray2dNulls1() {
 	    return new Boolean[][] {{null, false, null}, {true, null, true}};
+	}
+
+	public static Boolean[][] getBoxedBooleanArray2dNulls2() {
+	    return new Boolean[][] {{false, true}, {true, null}, {false, true}};
 	}
 
 	public static Boolean[][] getBoxedBooleanArray2dRagged1() {
@@ -927,8 +931,12 @@ public class TestData {
 		return new Byte[][] {{Byte.MIN_VALUE, -1}, {0, Byte.MAX_VALUE}};
 	}
 
-	public static Byte[][] getBoxedByteArray2dNulls() {
+	public static Byte[][] getBoxedByteArray2dNulls1() {
 	    return new Byte[][] {{null, Byte.MIN_VALUE, null}, {Byte.MIN_VALUE, null, Byte.MAX_VALUE}};
+	}
+
+	public static Byte[][] getBoxedByteArray2dNulls2() {
+	    return new Byte[][] {{Byte.MIN_VALUE, Byte.MAX_VALUE}, {Byte.MIN_VALUE, null}, {Byte.MIN_VALUE, Byte.MAX_VALUE}};
 	}
 
 	public static Byte[][] getBoxedByteArray2dRagged1() {

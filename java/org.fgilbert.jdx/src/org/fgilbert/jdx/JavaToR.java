@@ -1,7 +1,8 @@
 package org.fgilbert.jdx;
 
 ///re-read all comments now that we support n-dimensional arrays. remove comments about matrices
-///use System.arraycopy(src, srcPos, dest, destPos, length);
+
+///re-name coerce functions to coerceToDouble, etc. cuz, we will need coerctToDouble(int[]);
 
 /*
  * This class was written to optimize marshalling data between the JVM and R via rJava. 
@@ -494,6 +495,8 @@ public class JavaToR {
 		Iterator<?> iter = col.iterator();
 		Object o = iter.next();
 		JavaToR j2r = new JavaToR(o, this.arrayOrder);
+		if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+			this.rDataExceptionCode = j2r.rDataExceptionCode;
 		int[] compositeTypes = new int[col.size()];
 		compositeTypes[0] = j2r.getRdataCompositeCode();
 		Object[] objects = new Object[col.size()];
@@ -503,6 +506,8 @@ public class JavaToR {
 		MaybeRowMajorDataFrame maybeRowMajorDataFrame = new MaybeRowMajorDataFrame(j2r);
 		for (int i = 1; i < compositeTypes.length; i++) {
 			j2r = new JavaToR(iter.next(), this.arrayOrder);
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			compositeTypes[i] = j2r.getRdataCompositeCode();
 			objects[i] = j2r.getValueObject();
 			if (maybeNdimensionalArray.getValue()) {
@@ -698,6 +703,7 @@ public class JavaToR {
 						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to a numeric matrix.", dataTypeCodeInt));
 					}
 				}
+				break;
 			}
 			flatArray = flatArrayDouble;
 			break;
@@ -738,6 +744,7 @@ public class JavaToR {
 						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to an integer matrix.", dataTypeCodeInt));
 					}
 				}
+				break;
 			}
 			flatArray = flatArrayInt;
 			break;
@@ -760,6 +767,7 @@ public class JavaToR {
 					for (int j = 0; j < subarrayLength; j++)
 						flatArrayString[flatArrayIndex++] = subarrayString[j];
 				}
+				break;
 			}
 			flatArray = flatArrayString;
 			break;
@@ -782,6 +790,7 @@ public class JavaToR {
 					for (int j = 0; j < subarrayLength; j++)
 						flatArrayBoolean[flatArrayIndex++] = subarrayBoolean[j];
 				}
+				break;
 			}
 			flatArray = flatArrayBoolean;
 			break;
@@ -804,6 +813,7 @@ public class JavaToR {
 					for (int j = 0; j < subarrayLength; j++)
 						flatArrayByte[flatArrayIndex++] = subarrayByte[j];
 				}
+				break;
 			}
 			flatArray = flatArrayByte;
 			break;
@@ -816,46 +826,44 @@ public class JavaToR {
 		return;
 	}
 	
-	// This function is called only from within convertCollection.
+	/*
+	 * This function is called only from within convertCollection. It is only used when dimensions > 2.
+	 */
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		int[] subarrayDimensions = maybeNdimensionalArray.getSubarrayDimensions();
-		int[] newDimensions = new int[subarrayDimensions.length + 1];
-		newDimensions[0] = objects.length;
 		int flatArrayLength = objects.length;
-		for (int i = 0; i < subarrayDimensions.length; i++) {
-			newDimensions[i + 1] = subarrayDimensions[i];
+		for (int i = 0; i < subarrayDimensions.length; i++)
 			flatArrayLength *= subarrayDimensions[i];
-		}
 		int[] flatArray = new int[flatArrayLength];
 		int flatArrayIndex = 0;
-		if (subarrayDimensions.length == 1) {
-			for (int i = 0; i < objects.length; i++) {
-				int[] data = (int[]) objects[i];
-				for (int j = 0; j < data.length; j++)
-					flatArray[flatArrayIndex++] = data[j];
-			}
-		} else {
+		switch (this.arrayOrder) {
+		case COLUMN_MAJOR:
+		case ROW_MAJOR_JAVA:
 			for (int i = 0; i < objects.length; i++) {
 				Object[] ndObject = (Object[]) objects[i];
 				int[] data = (int[]) ndObject[1];
 				for (int j = 0; j < data.length; j++)
 					flatArray[flatArrayIndex++] = data[j];
 			}
-		}
-		this.dimensions = newDimensions;
-		switch (this.arrayOrder) {
+			this.dimensions = Arrays.copyOf(subarrayDimensions, subarrayDimensions.length + 1);
+			this.dimensions[this.dimensions.length - 1] = objects.length;
+			break;
 		case ROW_MAJOR:
-			break;
-		case COLUMN_MAJOR:
-			Utility.reverseArray(this.dimensions);
-			break;
-		case ROW_MAJOR_JAVA:
-			int swap = this.dimensions[this.dimensions.length - 1];
-			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
-			this.dimensions[this.dimensions.length - 2] = swap;
-			Utility.reverseArray(this.dimensions);
+			for (int i = 0; i < objects.length; i++) {
+				Object[] ndObject = (Object[]) objects[i];
+				int[] data = (int[]) ndObject[1];
+				for (int j = 0; j < data.length; j++)
+					flatArray[flatArrayIndex + j * objects.length] = data[j];
+				flatArrayIndex++;
+			}
+			this.dimensions = new int[subarrayDimensions.length + 1];
+			this.dimensions[0] = objects.length;
+			for (int i = 0; i < subarrayDimensions.length; i++)
+				this.dimensions[i + 1] = subarrayDimensions[i]; 
 			break;
 		}
+		
+		// R dimensions are always [row, column, matrix, cube, ...]
 		this.value = new Object[] {this.dimensions, flatArray};
 		this.rDataTypeCode = maybeNdimensionalArray.getTypeCode();
 		this.rDataStructureCode = RdataStructureCode.ND_ARRAY;
@@ -996,14 +1004,11 @@ public class JavaToR {
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
 			boolean[] subarray = j2r.getValueBooleanArray1d();
-			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
 					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
 				currentFlatArrayIndex++; 
 				for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -1083,14 +1088,11 @@ public class JavaToR {
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
 			byte[] subarray = j2r.getValueByteArray1d();			
-			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
 					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
 				currentFlatArrayIndex++; 
 				for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -1170,14 +1172,11 @@ public class JavaToR {
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
 			double[] subarray = j2r.getValueDoubleArray1d();			
-			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
 					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
 				currentFlatArrayIndex++; 
 				for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -1257,14 +1256,11 @@ public class JavaToR {
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
 			int[] subarray = j2r.getValueIntArray1d();			
-			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
 					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
 				currentFlatArrayIndex++; 
 				for (int j = 0; j < currentSubarrayIndex.length; j++) {
@@ -1344,14 +1340,11 @@ public class JavaToR {
 			// Coerces/unboxes array to int[].
 			JavaToR j2r = new JavaToR(Array.get(o, currentSubarrayIndex[currentSubarrayIndex.length - 1]), this.arrayOrder);
 			String[] subarray = j2r.getValueStringArray1d();			
-			this.rDataExceptionCode = j2r.rDataExceptionCode;
+			if (j2r.rDataExceptionCode != RdataExceptionCode.NONE)
+				this.rDataExceptionCode = j2r.rDataExceptionCode;
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
 				for (int j = 0; j < subarrayLength; j++)
-					/*
-					 *  The offset is the same as subarrayCount because of the way the data structure fills
-					 *  to mimic R's indexing scheme. Step through it to see how it works.
-					 */
 					flatArray[currentFlatArrayIndex + subarrayCount * j] = subarray[j];
 				currentFlatArrayIndex++; 
 				for (int j = 0; j < currentSubarrayIndex.length; j++) {
