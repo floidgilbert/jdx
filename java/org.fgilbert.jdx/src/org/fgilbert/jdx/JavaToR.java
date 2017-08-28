@@ -2,8 +2,6 @@ package org.fgilbert.jdx;
 
 ///re-read all comments now that we support n-dimensional arrays. remove comments about matrices
 
-///re-name coerce functions to coerceToDouble, etc. cuz, we will need coerctToDouble(int[]);
-
 /*
  * This class was written to optimize marshalling data between the JVM and R via rJava. 
  * A balance between performance and code clarity is the goal, but intuition has been sacrificed 
@@ -302,7 +300,7 @@ public class JavaToR {
 		initialize(value, rDataUserDefinedCode);
 	}
 	
-	private double[] coerceArray1D(BigDecimal[] a) {
+	private double[] coerceToDoubleArray1D(BigDecimal[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -311,7 +309,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private double[] coerceArray1D(BigInteger[] a) {
+	private double[] coerceToDoubleArray1D(BigInteger[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -320,25 +318,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private String[] coerceArray1D(char[] a) {
-		if (a == null)
-			return null;
-		String[] b = new String[a.length];
-		for (int i = 0; i < b.length; i++)
-			b[i] = Character.toString(a[i]);
-		return b;
-	}
-
-	private String[] coerceArray1D(Character[] a) {
-		if (a == null)
-			return null;
-		String[] b = new String[a.length];
-		for (int i = 0; i < b.length; i++)
-			b[i] = (a[i] == null) ? null : a[i].toString();
-		return b;
-	}
-
-	private double[] coerceArray1D(float[] a) {
+	private double[] coerceToDoubleArray1D(float[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -347,7 +327,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private double[] coerceArray1D(Float[] a) {
+	private double[] coerceToDoubleArray1D(Float[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -356,7 +336,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private double[] coerceArray1D(long[] a) {
+	private double[] coerceToDoubleArray1D(long[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -365,7 +345,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private double[] coerceArray1D(Long[] a) {
+	private double[] coerceToDoubleArray1D(Long[] a) {
 		if (a == null)
 			return null;
 		double[] b = new double[a.length];
@@ -374,7 +354,7 @@ public class JavaToR {
 		return b;
 	}
 
-	private int[] coerceArray1D(short[] a) {
+	private int[] coerceToIntegerArray1D(short[] a) {
 		if (a == null)
 			return null;
 		int[] b = new int[a.length];
@@ -383,12 +363,30 @@ public class JavaToR {
 		return b;
 	}
 
-	private int[] coerceArray1D(Short[] a) {
+	private int[] coerceToIntegerArray1D(Short[] a) {
 		if (a == null)
 			return null;
 		int[] b = new int[a.length];
 		for (int i = 0; i < b.length; i++)
 			b[i] = (a[i] == null) ? NA_INT : a[i].intValue();
+		return b;
+	}
+
+	private String[] coerceToStringArray1D(char[] a) {
+		if (a == null)
+			return null;
+		String[] b = new String[a.length];
+		for (int i = 0; i < b.length; i++)
+			b[i] = Character.toString(a[i]);
+		return b;
+	}
+
+	private String[] coerceToStringArray1D(Character[] a) {
+		if (a == null)
+			return null;
+		String[] b = new String[a.length];
+		for (int i = 0; i < b.length; i++)
+			b[i] = (a[i] == null) ? null : a[i].toString();
 		return b;
 	}
 
@@ -646,7 +644,7 @@ public class JavaToR {
 		}
 		
 		/*
-		 * Initialize variables used in conversion.
+		 * Initialize common variables used in conversion.
 		 */
 		Object flatArray = null;
 		int flatArrayLength = objects.length * subarrayLength;
@@ -831,36 +829,82 @@ public class JavaToR {
 	 */
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		int[] subarrayDimensions = maybeNdimensionalArray.getSubarrayDimensions();
+		
+		/*
+		 * Initialize common variables used in conversion.
+		 */
+		Object flatArray = null;
+		int flatArrayIndex = 0;
 		int flatArrayLength = objects.length;
 		for (int i = 0; i < subarrayDimensions.length; i++)
 			flatArrayLength *= subarrayDimensions[i];
-		int[] flatArray = new int[flatArrayLength];
-		int flatArrayIndex = 0;
-		switch (this.arrayOrder) {
-		case COLUMN_MAJOR:
-		case ROW_MAJOR_JAVA:
-			for (int i = 0; i < objects.length; i++) {
-				Object[] ndObject = (Object[]) objects[i];
-				int[] data = (int[]) ndObject[1];
-				for (int j = 0; j < data.length; j++)
-					flatArray[flatArrayIndex++] = data[j];
-			}
-			this.dimensions = Arrays.copyOf(subarrayDimensions, subarrayDimensions.length + 1);
-			this.dimensions[this.dimensions.length - 1] = objects.length;
+		int dataTypeCodeInt;
+		int[] arrayDataInt; double[] arrayDataDouble; byte[] arrayDataByte;
+		boolean[] arrayDataBoolean; String[] arrayDataString;
+		
+		/*
+		 * Convert collection based on the target data type.
+		 */
+		switch (maybeNdimensionalArray.getTypeCode()) {
+		case NUMERIC:
 			break;
-		case ROW_MAJOR:
-			for (int i = 0; i < objects.length; i++) {
-				Object[] ndObject = (Object[]) objects[i];
-				int[] data = (int[]) ndObject[1];
-				for (int j = 0; j < data.length; j++)
-					flatArray[flatArrayIndex + j * objects.length] = data[j];
-				flatArrayIndex++;
+		case INTEGER:
+			int[] flatArrayInt = new int[flatArrayLength];
+			switch (this.arrayOrder) {
+			case COLUMN_MAJOR:
+			case ROW_MAJOR_JAVA:
+				for (int i = 0; i < objects.length; i++) {
+					Object[] ndObject = (Object[]) objects[i];
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+						arrayDataInt = (int[]) ndObject[1];
+						for (int j = 0; j < arrayDataInt.length; j++)
+							flatArrayInt[flatArrayIndex++] = arrayDataInt[j];
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						arrayDataByte = (byte[]) ndObject[1];
+						for (int j = 0; j < arrayDataByte.length; j++)
+							flatArrayInt[flatArrayIndex++] = (int) arrayDataByte[j];
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to an integer n-dimensional array.", dataTypeCodeInt));
+					}
+				}
+				this.dimensions = Arrays.copyOf(subarrayDimensions, subarrayDimensions.length + 1);
+				this.dimensions[this.dimensions.length - 1] = objects.length;
+				break;
+			case ROW_MAJOR:
+				for (int i = 0; i < objects.length; i++) {
+					Object[] ndObject = (Object[]) objects[i];
+					dataTypeCodeInt = compositeTypes[i] & 0xFF;
+					if (dataTypeCodeInt == RdataTypeCode.INTEGER.value) {
+						arrayDataInt = (int[]) ndObject[1];
+						for (int j = 0; j < arrayDataInt.length; j++)
+							flatArrayInt[flatArrayIndex + j * objects.length] = arrayDataInt[j];
+						flatArrayIndex++;
+					} else if (dataTypeCodeInt == RdataTypeCode.RAW.value) {
+						arrayDataByte = (byte[]) ndObject[1];
+						for (int j = 0; j < arrayDataByte.length; j++)
+							flatArrayInt[flatArrayIndex + j * objects.length] = (int) arrayDataByte[j];
+						flatArrayIndex++;
+					} else {
+						throw new RuntimeException(String.format("The R data type code 0x%X is unsupported when converting a collection of arrays to an integer n-dimensional array.", dataTypeCodeInt));
+					}
+				}
+				this.dimensions = new int[subarrayDimensions.length + 1];
+				this.dimensions[0] = objects.length;
+				for (int i = 0; i < subarrayDimensions.length; i++)
+					this.dimensions[i + 1] = subarrayDimensions[i]; 
+				break;
 			}
-			this.dimensions = new int[subarrayDimensions.length + 1];
-			this.dimensions[0] = objects.length;
-			for (int i = 0; i < subarrayDimensions.length; i++)
-				this.dimensions[i + 1] = subarrayDimensions[i]; 
+			flatArray = flatArrayInt;
 			break;
+		case CHARACTER:
+			break;
+		case LOGICAL:
+			break;
+		case RAW:
+			break;
+		default:
+			throw new RuntimeException(String.format("The R data type code %s is unsupported when converting collections to n-dimensional arrays.", maybeNdimensionalArray.getTypeCode()));
 		}
 		
 		// R dimensions are always [row, column, matrix, cube, ...]
@@ -1460,7 +1504,7 @@ public class JavaToR {
 			if (cls.equals(Float.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.NUMERIC;
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((float[]) this.value);
+					this.value = coerceToDoubleArray1D((float[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1468,7 +1512,7 @@ public class JavaToR {
 			if (cls.equals(Long.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.NUMERIC;
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((long[]) this.value);
+					this.value = coerceToDoubleArray1D((long[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1476,7 +1520,7 @@ public class JavaToR {
 			if (cls.equals(Short.TYPE)) {
 				this.rDataTypeCode = RdataTypeCode.INTEGER;
 				if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((short[]) this.value);
+					this.value = coerceToIntegerArray1D((short[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalIntArray();
 				return;
@@ -1486,7 +1530,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = Character.toString((char) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((char[]) this.value);
+					this.value = coerceToStringArray1D((char[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalStringArray();
 				return;
@@ -1522,7 +1566,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = ((Float) this.value).doubleValue();
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((Float[]) this.value);
+					this.value = coerceToDoubleArray1D((Float[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1532,7 +1576,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = ((Long) this.value).doubleValue();
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((Long[]) this.value);
+					this.value = coerceToDoubleArray1D((Long[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1542,7 +1586,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = ((Short) this.value).intValue();
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((Short[]) this.value);
+					this.value = coerceToIntegerArray1D((Short[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalIntArray();
 				return;
@@ -1552,7 +1596,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = ((BigDecimal) this.value).doubleValue();
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((BigDecimal[]) this.value);
+					this.value = coerceToDoubleArray1D((BigDecimal[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1562,7 +1606,7 @@ public class JavaToR {
 				if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 					this.value = ((BigInteger) this.value).doubleValue();
 				else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-					this.value = coerceArray1D((BigInteger[]) this.value);
+					this.value = coerceToDoubleArray1D((BigInteger[]) this.value);
 				else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 					convertNdimensionalDoubleArray();
 				return;
@@ -1587,7 +1631,7 @@ public class JavaToR {
 			if (this.rDataStructureCode == RdataStructureCode.SCALAR)
 				this.value = ((Character) value).toString();
 			else if (this.rDataStructureCode == RdataStructureCode.VECTOR)
-				this.value = coerceArray1D((Character[]) this.value);
+				this.value = coerceToStringArray1D((Character[]) this.value);
 			else if (this.rDataStructureCode == RdataStructureCode.ND_ARRAY)
 				convertNdimensionalStringArray();
 			return;
