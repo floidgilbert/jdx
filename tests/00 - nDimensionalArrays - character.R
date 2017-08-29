@@ -21,6 +21,10 @@ for (i in 0:5) {
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
   expect_identical(convertToR(o), as.vector(a))
+  if (i != 0) {
+    p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+    expect_identical(convertToR(p), as.vector(a))
+  }
 }
 
 # Two-dimensional
@@ -40,6 +44,10 @@ for (i in 0:5) {
       expect_identical(convertToR(o), array(character(0), c(0, 0)))
     } else {
       expect_identical(convertToR(o), a)
+      if (j != 0) {
+        p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+        expect_identical(convertToR(p), a)
+      }
     }
   }
 }
@@ -64,6 +72,10 @@ for (i in 0:5) {
         expect_identical(convertToR(o), array(character(0), c(i, 0, 0)))
       } else {
         expect_identical(convertToR(o), a)
+        if (j * k != 0) {
+          p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+          expect_identical(convertToR(p), a)
+        }
       }
     }
   }
@@ -84,8 +96,13 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
-        if (i * j * k != 0)
+        if (i * j * k != 0) {
           expect_identical(convertToR(o), a)
+          if (l != 0) {
+            p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+            expect_identical(convertToR(p), a)
+          }
+        }
       }
     }
   }
@@ -117,8 +134,13 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
-          if (i * j * k * l != 0)
+          if (i * j * k * l != 0) {
             expect_identical(convertToR(o), a)
+            if (m != 0) {
+              p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+              expect_identical(convertToR(p), a)
+            }
+          }
         }
       }
     }
@@ -153,6 +175,10 @@ for (i in 0:5) {
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
   expect_identical(convertToR(o, array.order = "column-major"), as.vector(a))
+  if (i != 0) {
+    p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+    expect_identical(convertToR(p, array.order = "column-major"), as.vector(a))
+  }
 }
 
 # Two-dimensional
@@ -172,6 +198,10 @@ for (i in 0:5) {
       expect_identical(convertToR(o, array.order = "column-major"), array(character(0), c(0, 0)))
     } else {
       expect_identical(convertToR(o, array.order = "column-major"), a)
+      if (i != 0) {
+        p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+        expect_identical(convertToR(p, array.order = "column-major"), a)
+      }
     }
   }
 }
@@ -196,6 +226,10 @@ for (i in 0:5) {
         expect_identical(convertToR(o, array.order = "column-major"), array(character(0), c(0, 0, k)))
       } else {
         expect_identical(convertToR(o, array.order = "column-major"), a)
+        if (i * j * k != 0) {
+          p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+          expect_identical(convertToR(p, array.order = "column-major"), a)
+        }
       }
     }
   }
@@ -216,8 +250,13 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
-        if (j * k * l != 0)
+        if (j * k * l != 0) {
           expect_identical(convertToR(o, array.order = "column-major"), a)
+          if (i * l != 0) {
+            p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+            expect_identical(convertToR(p, array.order = "column-major"), a)
+          }
+        }
       }
     }
   }
@@ -249,8 +288,13 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
-          if (j * k * l * m != 0)
+          if (j * k * l * m != 0) {
             expect_identical(convertToR(o, array.order = "column-major"), a)
+            if (i != 0) {
+              p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+              expect_identical(convertToR(p, array.order = "column-major"), a)
+            }
+          }
         }
       }
     }
@@ -286,6 +330,10 @@ for (i in 0:5) {
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
   expect_identical(convertToR(o, array.order = "row-major-java"), as.vector(a))
+  if (i != 0) {
+    p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+    expect_identical(convertToR(p, array.order = "row-major-java"), as.vector(a))
+  }
 }
 
 # Two-dimensional
@@ -305,6 +353,10 @@ for (i in 0:5) {
       expect_identical(convertToR(o, array.order = "row-major-java"), array(character(0), c(0, 0)))
     } else {
       expect_identical(convertToR(o, array.order = "row-major-java"), a)
+      if (j != 0) {
+        p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+        expect_identical(convertToR(p, array.order = "row-major-java"), a)
+      }
     }
   }
 }
@@ -335,6 +387,10 @@ for (i in 0:5) {
         expect_identical(convertToR(o, array.order = "row-major-java"), array(character(0), c(0, 0, k)))
       } else {
         expect_identical(convertToR(o, array.order = "row-major-java"), a)
+        if (i * j * k != 0) {
+          p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+          expect_identical(convertToR(p, array.order = "row-major-java"), a)
+        }
       }
     }
   }
@@ -364,8 +420,13 @@ for (i in 0:5) {
         # cat(s1, "\n")
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
-        if (i * k * l != 0)
+        if (i * k * l != 0) {
           expect_identical(convertToR(o, array.order = "row-major-java"), a)
+          if (j != 0) {
+            p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+            expect_identical(convertToR(p, array.order = "row-major-java"), a)
+          }
+        }
       }
     }
   }
@@ -406,8 +467,13 @@ for (i in 0:5) {
           # cat(s1, "\n")
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
-          if (i * k * l * m != 0)
+          if (i * k * l * m != 0) {
             expect_identical(convertToR(o, array.order = "row-major-java"), a)
+            if (j != 0) {
+              p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
+              expect_identical(convertToR(p, array.order = "row-major-java"), a)
+            }
+          }
         }
       }
     }

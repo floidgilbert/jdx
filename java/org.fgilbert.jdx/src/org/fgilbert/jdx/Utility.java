@@ -655,6 +655,26 @@ public class Utility {
 		return array;
 	}
 	
+	public static List<Object> deepAsList(Object array) {
+		int arrayLength = Array.getLength(array);
+		ArrayList<Object> al = new ArrayList<Object>(arrayLength);
+		if (array.getClass().getComponentType().isArray()) {
+			Object element;
+			for (int i = 0; i < arrayLength; i++) {
+				element = Array.get(array, i);
+				al.add((element == null) ? null : Utility.deepAsList(element));
+			}
+		} else {
+			for (int i = 0; i < arrayLength; i++)
+				/*
+				 * Can't use Arrays.asList() in the case of primitive arrays. So,
+				 * iterate through each item instead.
+				 */
+				al.add(Array.get(array, i));
+		}
+		return al;
+	}
+	
 	/*
 	 * Iterates through all dimensions and returns the base component type of an
 	 * array class. Returns null if `cls` does not represent an array.
