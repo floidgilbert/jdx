@@ -19,11 +19,8 @@ load(rdata.tables)
 
 ## Java Data Exchange for R
 
-///update all tables one last time.
+The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbanek's excellent [rJava](https://cran.r-project.org/package=rJava) package to simplify and extend data exchange between R and Java. The jdx package was primarily developed to provide data exchange functionality for [jsr223](https://cran.r-project.org/package=jsr223), the high-level scripting interface for the Java platform. We provide jdx to developers who may want to extend existing rJava solutions. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.
 
-The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbanek's excellent [rJava](https://cran.r-project.org/package=rJava) package to simplify and extend data exchange between R and Java. Together, jdx and rJava provide a potent, low-level interface for the Java platform. The jdx package was primarily developed to provide data exchange functionality for [jsr223](https://cran.r-project.org/package=jsr223), the high-level scripting interface for the Java platform. We provide jdx to developers who may want to extend existing rJava solutions. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.
-
-///put these changes in Rd files.
 The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including row-major vs. column-major ordering for arrays and data frames.
 
 For sites that plan on designing and distributing packages that depend on jdx, it may be helpful to know that jdx does not use or load rJava's companion package JRI (the Java/R Interface).
@@ -32,7 +29,7 @@ For sites that plan on designing and distributing packages that depend on jdx, i
 
 ## Primary Functions
 
-This example demonstrates the primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering for arrays by default.
+This example demonstrates the primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default. Column-major and row-major-Java ordering options are also available.
 
 ```{r}
 library("jdx")
@@ -91,7 +88,7 @@ The following two tables detail the behavior of `convertToJava()` for length-one
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # r2j.length.one.vector.scalars.as.objects.false <- mt(9, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -109,7 +106,7 @@ pander::pander(
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # r2j.length.one.vector.scalars.as.objects.true <- mt(9, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -129,7 +126,7 @@ The `convertToJava()` functionality for vectors, one-dimensional arrays, and one
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # r2j.vectors <- mt(9, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -169,7 +166,7 @@ The following table shows how `convertToJava()` maps n-dimensional R structures 
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # r2j.arrays <- mt(9, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -194,6 +191,8 @@ When `data.frame.row.major = FALSE`, `convertToJava()` creates a `LinkedHashMap<
 ### R Lists and Environments
 
 The jdx package supports data exchange for lists, named lists, nested lists (i.e., lists containing other lists), and environments. The `convertToJava()` function converts R lists to Java `ArrayList<Object>` objects. It converts named lists and `environment` objects to Java `LinkedHashMap<String, Object>` objects. The `ArrayList` and `LinkedHashMap` objects implement the Java `Collection` and `Map` interfaces, respectively. These interfaces are ubiquitous in the Java API.
+
+**NOTE:** If `lst` is an unnamed list, `convertToR(convertToJava(lst))` may not result in an unnamed list. As noted above, the `convertToJava()` function converts unnamed R lists to `ArrayList` objects which implement the `Collection` interface. The `convertToR()` function converts Java collections to the most appropriate R object depending on content. For example, a collection containing compatible scalars will be converted to an R vector, and a collection containing n-dimensional arrays will be converted to an (n + 1)-dimensional array. See [Java Collections](#java_collections) for more information.
 
 ## Converting Java Objects to R Objects
 
@@ -221,7 +220,7 @@ The `convertToR()` function converts Java scalars to length-one R vectors. Scala
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # j2r.scalars <- mt(12, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -247,7 +246,7 @@ If an object array contains `null`, it is replaced by the appropriate R `NA` val
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
 # j2r.arrays <- mt(13, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
@@ -263,7 +262,7 @@ pander::pander(
 
 ### Java Ragged Arrays
 
-Java n-dimensional arrays whose sub-arrays of a given dimension are not the same length are known as *ragged arrays*. Ragged arrays cannot be converted to R arrays. The `convertToR()` function translates ragged arrays to lists (of lists) of vectors///not sure if this is true.///also, give an example. The mapping rules are the same as  for one-dimensional Java arrays.///not sure if this is true if they return matrices.
+Java n-dimensional arrays whose subarrays of a given dimension are not the same dimension are known as *ragged arrays*. Ragged arrays cannot be converted to R arrays. The `convertToR()` function translates ragged arrays to lists of the appropriate object. For example, a matrix containing subarrays of different lengths will be converted to an R list of vectors. Likewise, a three-dimensional array containing two matrices of different dimensions will be converted to an R list of matrices.
 
 ### Java Maps # {#java_maps}
 
@@ -273,12 +272,14 @@ The `strings.as.factors` parameter of the `convertToR()` function controls wheth
 
 ### Java Collections # {#java_collections}
 
-Java collections can be converted to vectors, n-dimensional arrays///still true?///, data frames, and unnamed lists depending on content. Conversions rules are dilineated in the table below. The `convertToR()` parameters `array.order` and `strings.as.factors` behave the same way for objects converted from collections as they do elsewhere. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for a description of the `array.order` parameter. Refer to [Java Maps](#java_maps) for details relating to `strings.as.factors`. ///not sure the statement about byte arrays in the following table is true.///
+Java objects implementing the `java.util.Collection` interface can be converted to vectors, n-dimensional arrays, data frames, and unnamed lists. Conversions rules are dilineated in the table below. The `convertToR()` parameters `array.order` and `strings.as.factors` behave the same way for objects converted from collections as they do elsewhere. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for a description of the `array.order` parameter. Refer to [Java Maps](#java_maps) for details relating to `strings.as.factors`.
+
+**NOTE:** If `lst` is an unnamed list, `convertToR(convertToJava(lst))` may not result in an unnamed list. The `convertToJava()` function converts unnamed R lists to `ArrayList` objects which implement the `Collection` interface. The `convertToR()` function converts Java collections to the most appropriate R object depending on content (see the table below). For example, a collection containing compatible scalars will be converted to an R vector, and a collection containing n-dimensional arrays will be converted to an (n + 1)-dimensional array.
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
-# Highlight the appropriate section in mapping.xlsx before executing the next line
-# j2r.collections <- mt(11, 4, what = character(), write.to.clipboard = FALSE)
+# Highlight and copy the appropriate section in mapping.xlsx before executing the next line
+# j2r.collections <- mt(10, 4, what = character(), write.to.clipboard = FALSE)
 # file.remove(rdata.tables)
 # save.image(file = rdata.tables)
 pander::pander(

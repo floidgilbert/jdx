@@ -43,5 +43,18 @@ test_that(
     data.code <- processCompositeDataCode(j2r, composite.data.code)
     expect_identical(data.code[4], 0x12000000L)
     expect_error(convertToRlowLevel(j2r, data.code), "Unsupported data type \\(type:0xFE, structure:0xFF00)\\.")
+    
+    df1 <- data.frame(a = 1:26, b = letters, stringsAsFactors = TRUE)
+    o <- convertToJava(df1)
+    composite.data.code <- rJava::.jcall(j2r, "I", "initialize", rJava::.jcast(o))
+    data.code <- processCompositeDataCode(j2r, composite.data.code)
+    df2 <- convertToRlowLevel(j2r, data.code, strings.as.factors = TRUE)
+    expect_identical(df1, df2)
+    df1 <- data.frame(a = 1:26, b = letters, stringsAsFactors = FALSE)
+    o <- convertToJava(df1)
+    composite.data.code <- rJava::.jcall(j2r, "I", "initialize", rJava::.jcast(o))
+    data.code <- processCompositeDataCode(j2r, composite.data.code)
+    df2 <- convertToRlowLevel(j2r, data.code, strings.as.factors = FALSE)
+    expect_identical(df1, df2)
   }
 )

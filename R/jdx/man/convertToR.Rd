@@ -6,7 +6,7 @@ Convert Java Objects to R Objects
 }
 
 \description{
-The function \code{\link{convertToR}} converts the Java objects behind \CRANpkg{rJava} object references to R objects. The function \code{\link{convertToR}} is the inverse of \code{\link{convertToJava}}.
+The function \code{\link{convertToR}} converts the Java objects referenced by \CRANpkg{rJava} objects to R objects. The function \code{\link{convertToR}} is the inverse of \code{\link{convertToJava}}.
 }
 
 \usage{
@@ -52,6 +52,13 @@ m <- matrix(1:4, 2, 2)
 o = convertToJava(m, array.order = "column-major")
 getJavaClassName(o)
 identical(m, convertToR(o, array.order = "column-major"))
+
+# Convert 4-dimensional array using row-major index ordering
+dimensions <- c(3, 2, 2, 2)
+a = array(1:prod(dimensions), dimensions)
+o = convertToJava(a, array.order = "row-major")
+getJavaClassName(o)
+identical(a, convertToR(o, array.order = "row-major"))
 
 # Convert data frame
 identical(iris, convertToR(convertToJava(iris)))

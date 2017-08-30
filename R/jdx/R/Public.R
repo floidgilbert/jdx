@@ -1,7 +1,6 @@
 # Standard Interface ------------------------------------------------------
 # Most developers should use the standard interface.
 
-#///review the unit testing for jdx now that I've changed the parameters.
 #' @export
 convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
 
@@ -256,7 +255,6 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
 
   createDataFrame <- function(x) {
 
-    #///make sure that wherever we have rJava::... that we specify the expected type. This is much faster.
     evalArray <- function(i) {
       return(rJava::.jevalArray(arrays[[i]], rawJNIRefSignature = dataCodeToJNI(processCompositeDataCode(j2r, types[i]))))
     }
@@ -293,15 +291,14 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       if (data.code[2] == SC_VECTOR)
         return(rJava::.jevalArray(objects[[i]], rawJNIRefSignature = dataCodeToJNI(data.code)))
 
-      #///make sure rowmajor settings work correctly in this scenario
       if (data.code[2] == SC_ND_ARRAY)
-        return(createNdimensionalArray(rJava::.jevalArray(objects[[i]]), data.code))
+        return(createNdimensionalArray(rJava::.jevalArray(objects[[i]], rawJNIRefSignature = "[Ljava/lang/Object;"), data.code))
 
       if (data.code[2] == SC_DATA_FRAME)
-        return(createDataFrame(rJava::.jevalArray(objects[[i]])))
+        return(createDataFrame(rJava::.jevalArray(objects[[i]], rawJNIRefSignature = "[Ljava/lang/Object;")))
 
       if (data.code[2] == SC_LIST || data.code[2] == SC_NAMED_LIST)
-        return(createList(rJava::.jevalArray(objects[[i]]), data.code))
+        return(createList(rJava::.jevalArray(objects[[i]], rawJNIRefSignature = "[Ljava/lang/Object;"), data.code))
 
       throwUnsupportedDataCodeException(data.code)
     }

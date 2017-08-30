@@ -22,7 +22,7 @@ convertToJava(
 
 \arguments{
   \item{value}{
-An \R vector, matrix, array, table, factor, data frame, list, or environment. Nested lists are supported. Supported data types: numeric, integer, character, logical, and raw.
+An R vector, matrix, array, table, factor, data frame, list, or environment. Nested lists are supported. Supported data types: numeric, integer, character, logical, and raw.
 
 }
   \item{length.one.vector.as.array}{
@@ -43,13 +43,13 @@ A logical vector of length one. When \code{TRUE} (the default), an attempt is ma
 }
 
 \details{
-The \code{\link{convertToJava}} function is used to create objects that can be used as method/function parameters in the \pkg{rJava} package. \R vectors, matrices, n-dimensional arrays, tables, factors, data frames, environments, lists, named lists, and nested lists are supported as well as data types numeric, integer, logical, character and raw.
+The \code{\link{convertToJava}} function is used to create objects that can be used as method parameters in the \pkg{rJava} package. R vectors, matrices, n-dimensional arrays, tables, factors, data frames, environments, lists, named lists, and nested lists are supported as well as data types numeric, integer, logical, character and raw.
 
 The \href{../doc/Introduction.html}{vignette} contains all documentation for \code{\link{convertToJava}} and its inverse function \code{\link{convertToR}}. Note that these functions are not always perfect inverses of each other because some data structures cannot be reproduced exactly in the destination environment.
 }
 
 \value{
-A Java object reference or an \R vector. See the \href{../doc/Introduction.html}{vignette} for details.
+A Java object reference or an R vector. See the \href{../doc/Introduction.html}{vignette} for details.
 }
 
 \seealso{
@@ -65,6 +65,13 @@ m <- matrix(1:4, 2, 2)
 o = convertToJava(m, array.order = "column-major")
 getJavaClassName(o)
 identical(m, convertToR(o, array.order = "column-major"))
+
+# Convert 4-dimensional array using row-major index ordering
+dimensions <- c(3, 2, 2, 2)
+a = array(1:prod(dimensions), dimensions)
+o = convertToJava(a, array.order = "row-major")
+getJavaClassName(o)
+identical(a, convertToR(o, array.order = "row-major"))
 
 # Convert data frame
 identical(iris, convertToR(convertToJava(iris)))

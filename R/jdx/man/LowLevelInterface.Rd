@@ -40,7 +40,7 @@ processCompositeDataCode(
 An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR$ArrayOrder} enumeration value.
 }
   \item{j2r}{
-An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object. Use \code{createJavaToRobject} to create an instance.
+An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object. The \code{createJavaToRobject} function can be used to create an instance.
 }
   \item{data.code}{
 A \pkg{jdx} data code value created with \code{processCompositeDataCode}.
@@ -63,7 +63,7 @@ A logical value indicating whether to raise a specific warning.
 }
 
 \details{
-See the code examples for a thread-safe alternative to \code{\link{javaToR}}.
+See the code examples for a thread-safe alternative to \code{\link{javaToR}}. This functional interface is awkward, but it was designed to limit type inference and the number of transactions between R and the JVM to maximize performance for \pkg{jsr223}.
 }
 
 \seealso{
@@ -101,7 +101,7 @@ composite.data.code <- rJava::.jcall(
 data.code <- processCompositeDataCode(j2r, composite.data.code)
 
 # Pass the JavaToR object and the data code to
-# convertToRlowLevel to get the resulting R object.
+# convertToRlowLevel to get the R object.
 convertToRlowLevel(j2r, data.code, strings.as.factors = FALSE)
 
 # When converting n-dimensional arrays, pass an array 

@@ -1,5 +1,3 @@
-#///write up release notes...what to do. download latest R build, build both jar files, build R, run tests, etc.
-#///devtools::install(build_vignettes = TRUE); library(jdx); ?jdx ///add this line to release notes? no.
 # Constants ---------------------------------------------------------------
 
 # Type codes used to determine return value types coming from Java. While
