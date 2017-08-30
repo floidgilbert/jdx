@@ -2,7 +2,7 @@ library(testthat)
 library(jdx)
 
 # These tests cover only the rudimentary low-level interface. Comprehensive data
-# testing is done in the jsr223 package for a two reasons. First, the tests are 
+# testing is done in the jsr223 package for two reasons. First, the tests are 
 # much easier to create with the help of JavaScript. Second, the jdx
 # functionality was originally a part of jsr223 when the tests were first
 # written.

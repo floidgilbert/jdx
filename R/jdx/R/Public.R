@@ -1,4 +1,5 @@
 # Standard Interface ------------------------------------------------------
+
 # Most developers should use the standard interface.
 
 #' @export
@@ -202,12 +203,13 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
   throwUnsupportedRtypeException(class(value))
 }
 
-# The Java code for convertToR is contained in the class
-# org.fgilbert.jdx.JavaToR. The jdx.j2r variable is bound to a an instance of
-# this class that is re-used to improve performance. Recreating instances of
-# JavaToR is very expensive via rJava. Unfortunately, this performance comes as
-# the cost of thread-safety. Do not call convertToR from separate threads. Use
-# convertToRlowLevel for thread-safe conversion.
+# The Java code for convertToR is contained in the class 
+# org.fgilbert.jdx.JavaToR. The jdx.j2r variable is bound to a an instance of 
+# this class that is re-used to improve performance. Recreating instances of 
+# JavaToR is very expensive via rJava. Unfortunately, this performance comes as 
+# the cost of thread-safety. Do not call convertToR from separate threads. Use 
+# convertToRlowLevel for thread-safe object conversion. See documentation for 
+# convertToRlowLevel.
 #' @export
 convertToR <- function(value, strings.as.factors = NULL, array.order = "row-major") {
   # strings.as.factors is validated in convertToRlowLevel()
@@ -234,8 +236,7 @@ getJavaClassName <- function(value) {
 
 # These functions are used by the high-level interface. They can also be used in
 # Java integrations (such as the jsr223 project) to avoid expensive rJava calls
-# during conversion that create new objects or obtain references to objects
-# (non-primitives).
+# during conversion that create new objects or obtain references to objects.
 
 #' @export
 arrayOrderToString <- function(value) {
@@ -453,7 +454,7 @@ processCompositeDataCode <- function(j2r, composite.data.code, throw.exceptions 
     warning(MSG_WARNING_MISSING_RAW_VALUES, call. = FALSE)
   } else if (result[1] == TC_UNSUPPORTED) {
     # This should never happen. The JavaToR class should raise this error on the Java side.
-    # If it doesn't the developer has broken something...
+    # If this error is thrown it indicates that a developer has broken something...
     stop("The Java data type could not be converted to an R object. This exception is unexpected at this location. Please report this error as a bug with relevant code.")
   }
   return(result)

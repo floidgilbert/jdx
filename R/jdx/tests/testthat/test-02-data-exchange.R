@@ -6,7 +6,7 @@ library(jdx)
 # JavaScript. Second, many of the tests were developed before jdx was separated
 # from jsr223.
 # 
-# Some jdx data testing is included in the tests folder above the project (../../../../tests/*).
-
+# Some jdx data testing is included in the tests folder above the R project folder.
+#
 
 

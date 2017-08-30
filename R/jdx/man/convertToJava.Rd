@@ -45,7 +45,7 @@ A logical vector of length one. When \code{TRUE} (the default), an attempt is ma
 \details{
 The \code{\link{convertToJava}} function is used to create objects that can be used as method parameters in the \pkg{rJava} package. R vectors, matrices, n-dimensional arrays, tables, factors, data frames, environments, lists, named lists, and nested lists are supported as well as data types numeric, integer, logical, character and raw.
 
-The \href{../doc/Introduction.html}{vignette} contains all documentation for \code{\link{convertToJava}} and its inverse function \code{\link{convertToR}}. Note that these functions are not always perfect inverses of each other because some data structures cannot be reproduced exactly in the destination environment.
+The \href{../doc/Introduction.html}{vignette} contains all documentation for \code{\link{convertToJava}} and its inverse function \code{\link{convertToR}}. Note that these functions are not always perfect inverses of each other. See \href{../doc/Introduction.html#conversion_issues}{Conversion Issues} for more information.
 }
 
 \value{

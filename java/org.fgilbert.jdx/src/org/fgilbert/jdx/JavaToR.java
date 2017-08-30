@@ -109,7 +109,6 @@ public class JavaToR {
 	private class MaybeNdimensionalArray {
 
 		private int[] subarrayDimensions;
-		private boolean typeChanged = false;
 		private RdataTypeCode typeCode;
 		private boolean value = false;
 		
@@ -128,11 +127,6 @@ public class JavaToR {
 			typeCode = j2r.getRdataTypeCode();
 		}
 		
-		///remove if not used.
-		boolean getTypeChanged() {
-			return typeChanged;
-		}
-
 		int[] getSubarrayDimensions() {
 			return subarrayDimensions;
 		}
@@ -167,13 +161,11 @@ public class JavaToR {
 				} else if ((typeCode == RdataTypeCode.INTEGER || typeCode == RdataTypeCode.RAW) && j2r.getRdataTypeCode() == RdataTypeCode.NUMERIC) {
 					// Change type to numeric. Integer and raw arrays will be coerced to numeric.
 					typeCode = RdataTypeCode.NUMERIC;
-					typeChanged = true;
 				} else if (typeCode == RdataTypeCode.INTEGER && j2r.getRdataTypeCode() == RdataTypeCode.RAW) {
 					// Do nothing. Raw arrays will be coerced to integer.
 				} else if (typeCode == RdataTypeCode.RAW && j2r.getRdataTypeCode() == RdataTypeCode.INTEGER) {
 					// Revert type to integer. Raw arrays will be coerced to integer.
 					typeCode = RdataTypeCode.INTEGER;
-					typeChanged = true;
 				} else {
 					value = false;
 				}

@@ -1,9 +1,9 @@
 # Constants ---------------------------------------------------------------
 
-# Type codes used to determine return value types coming from Java. While
-# handling each return type explicitly is cumbersome, but it is required to
-# reduce expensive calls (like class inference and casting) via rJava. These
-# codes are combined with other codes. See processCompositeDataCode().
+# Type codes used to determine return value data types coming from Java. While 
+# handling each return type explicitly is cumbersome, it is required to reduce
+# expensive calls (like class inference and casting) via rJava. These codes are
+# combined with other codes. See processCompositeDataCode().
 TC_NULL <- 0x00L
 TC_NUMERIC <- 0x01L
 TC_INTEGER <- 0x02L
@@ -29,10 +29,9 @@ EC_WARNING_MISSING_LOGICAL_VALUES <- 0xA0000L
 EC_WARNING_MISSING_RAW_VALUES <- 0xB0000L
 
 # Logical NA cannot be represented in primitive Java boolean types. Logical NA 
-# will be coerced to FALSE to align with rJava. TRUE was chosen for
-# compatibility with rscala and Rcpp. When logical NAs are coerced, a warning is
-# thrown. Java null values in java.lang.Boolean boxed types are also coerced
-# with a warning.
+# will be coerced to FALSE to align with rJava. When logical NAs are coerced, a
+# warning is thrown. Java null values in java.lang.Boolean boxed types are also
+# coerced with a warning.
 NA_ASSUMPTION_LOGICAL <- FALSE
 MSG_WARNING_MISSING_LOGICAL_VALUES <- sprintf("Missing values encountered during logical (boolean) data coercion have been replaced with '%s'.", NA_ASSUMPTION_LOGICAL)
 
@@ -44,9 +43,9 @@ MSG_WARNING_MISSING_RAW_VALUES <- sprintf("Missing values encountered during raw
 
 # Global Variables --------------------------------------------------------
 
-# These are Java objects that are initialized during .onLoad. Creating these objects
-# via rJava is slow, so instantiate them only and re-use them to improve
-# performance.
+# These are Java objects that are initialized during .onLoad. Creating these
+# objects via rJava is slow, so instantiate them only once and re-use them to
+# improve performance.
 array.order.values <- NULL;
 jdx.utility <- NULL;
 jdx.j2r <- NULL;
