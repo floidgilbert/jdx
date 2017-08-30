@@ -266,15 +266,15 @@ Java n-dimensional arrays whose subarrays of a given dimension are not the same 
 
 ### Java Maps # {#java_maps}
 
-The `convertToR()` function attempts to convert Java objects implementing the `java.util.Map` interface to named lists or data frames. The map keys must be string values. If the map contains same-length arrays, or same-length collections that can be converted to arrays, the map will be converted to a data frame. Otherwise, the object will be converted to a named list.
+The `convertToR()` function attempts to convert Java objects implementing the `Map` interface to named lists or data frames. The map keys must be string values. If the map contains multiple same-length arrays, or same-length collections that can be converted to arrays, the map will be converted to a data frame. Otherwise, the object will be converted to a named list.
 
 The `strings.as.factors` parameter of the `convertToR()` function controls whether string arrays are automatically converted to factors when creating a data frame. If `strings.as.factors = NULL` (the default), the R system setting is used (see `base::getOption("stringsAsFactors")`). When `strings.as.factors = TRUE`, string arrays will be converted to factors. Finally, if `strings.as.factors = FALSE`, the string arrays are converted to `character` vectors.
 
 ### Java Collections # {#java_collections}
 
-Java objects implementing the `java.util.Collection` interface can be converted to vectors, n-dimensional arrays, data frames, and unnamed lists. Conversions rules are dilineated in the table below. The `convertToR()` parameters `array.order` and `strings.as.factors` behave the same way for objects converted from collections as they do elsewhere. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for a description of the `array.order` parameter. Refer to [Java Maps](#java_maps) for details relating to `strings.as.factors`.
+Java objects implementing the `Collection` interface can be converted to vectors, n-dimensional arrays, data frames, and unnamed lists. Conversions rules are delineated in the table below. Many of these rules arise from the fact that JavaScript arrays are implemented as collections. Hence, jdx attempts to make collections behave as arrays wherever possible. (Remember, jdx was developed primarily for jsr223, the high-level scripting interface for Java and R.) This is also natural for Java programmers accustomed to switching between array-based and collection-based APIs.
 
-**NOTE:** If `lst` is an R list, `convertToR(convertToJava(lst))` may not result in a list. See (Conversion Issues)(#conversion_issues) for more information.
+The `convertToR()` parameters `array.order` and `strings.as.factors` behave the same way for objects converted from collections as they do elsewhere. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for a description of the `array.order` parameter. Refer to [Java Maps](#java_maps) for details relating to `strings.as.factors`.
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
@@ -294,33 +294,100 @@ pander::pander(
 
 ## Conversion Issues # {#conversion_issues}
 
+The jdx data exchange functions use standard R and Java objects instead of custom classes for maximum compatibility. In some cases, it is not possible to know for certain what the intended target data structure should be. For example, should a collection of Java arrays be converted to an R list of vectors or a matrix? This section highlights conversion rules related to ambigous data structures. Developers who discover that `convertToJava()` and `convertToR()` are not always perfect inverses of each other will find the information here particularly useful.
 
+### Unnamed R Lists
 
-Uses generic Java objects. Here are some scenarios to be mindful of.
+If `lst` is an R list, `convertToR(convertToJava(lst))` may not result in a list. If `lst` is an unnamed list, `convertToJava(lst)` creates an object whose class implements `java.util.Collection`. However, `convertToR()` does not always create an unnamed list when it encounters a Java collection. There are several reasons for this, some of which are mentioned in [Java Collections](#java_collections). We consider several cases below where an R list may be converted to Java, and then back to R, with unexpected results.
 
-list(factor)
+**NOTE:** Many of the common conversion issues related to unnamed lists can be avoided by using named lists.
 
-column major df with one column vs. row major df.
+A list of scalars (i.e., length-one vectors) converted to Java will be converted back to R as a vector if the data types are considered compatible. See the conversion table in [Java Collections](#java_collections)) for data types that are considered compatible. In the following example, a list containing numeric, integer, and raw values, are converted to a Java collection containing `double`, `int`, and `byte` values, respectively. The Java collection is converted back to R as a numeric vector because these number types are considered compatible.
 
-changing the length of something will result in a list being returned.
+```{r}
+lst <- list(1.1, 2L, as.raw(3))
+(o <- convertToJava(lst))
+(r <- convertToR(o))
+class(r)
+```
 
-changing a value in a JS array (collection) will return a different data type.
+In contrast, the list in the next example will be converted back to R as a list because the types are not considered compatible.
 
-c(1,2,3) will be an integer (1,2,3) coming back from JS.
+```{r}
+lst <- list(1.1, "a")
+(o <- convertToJava(lst))
+(r <- convertToR(o))
+class(r)
+```
 
-As noted above, the `convertToJava()` function converts unnamed R lists to `ArrayList` objects which implement the `Collection` interface. The `convertToR()` function converts Java collections to the most appropriate R object depending on content. For example, a collection containing compatible scalars will be converted to an R vector, and a collection containing n-dimensional arrays will be converted to an (n + 1)-dimensional array. See [Java Collections](#java_collections) for more information.
+A list of compatible n-dimensional arrays will be converted back to R as an (n + 1)-dimensional array. (Note that vectors and factors are considered 1-dimensional arrays.) As with scalars, structures of mixed number types will assume the most generic number data type. This code returns a numeric matrix:
 
-**NOTE:** If `lst` is an R list, `convertToR(convertToJava(lst))` may not result in a list. As noted above, the `convertToJava()` function converts unnamed R lists to `ArrayList` objects which implement the `Collection` interface. The `convertToR()` function converts Java collections to the most appropriate R object depending on content. For example, a collection containing compatible scalars will be converted to an R vector, and a collection containing n-dimensional arrays will be converted to an (n + 1)-dimensional array. See [Java Collections](#java_collections) for more information.
+```{r}
+lst <- list(c(1, 2), c(3L, 4L))
+(o <- convertToJava(lst, array.order = "column-major"))
+(r <- convertToR(o, array.order = "column-major"))
+class(r)
+```
 
-named list of named vectors > data frame
+Similarly, this next example results in numeric 3-dimensional array.
 
-empty arrays as lists...or empty collections as lists
+```{r}
+# This example results in a three-dimensional array.
+lst <- list(matrix(1:4, 2, 2), matrix(5:8, 2, 2))
+(o <- convertToJava(lst, array.order = "column-major"))
+convertToR(o, array.order = "column-major")
+```
 
-empty map to empty list
+Perhaps the most unexpected result is when a single-member list is converted back to R as a vector or array. In this case, a nested list becomes a matrix:
 
-row major is slower that column in df
+```{r}
+lst <- list(list(1))
+convertToR(convertToJava(lst))
+```
 
-see section below for conversion of bytes.
+Unnamed lists containing named lists of scalars will be converted to a data frame if the names are all the same and the data types are compatible.
+
+```{r}
+lst <- list(
+  list(field1 = "a", field2 = 1),
+  list(field1 = "b", field2 = 2)
+)
+convertToR(convertToJava(lst))
+```
+
+All of the conversion issues illustrated above can be avoided by using named lists in place of unnamed lists. For example, this list will remain a list.
+
+```{r}
+lst <- list(a = 1.1, b = 2L, c = as.raw(3))
+convertToR(convertToJava(lst))
+```
+
+### Named R Lists
+
+Named R lists have fewer ambiguity issues than unnamed lists. The only exception applies to data frames. A named list of same-length vectors is converted to a Java map of arrays. This structure will be converted back to R as a data frame if it contains two or more arrays. The following example illustrates this behavior.
+
+```{r}
+lst <- list(col1 = 1:3, col2 = letters[1:3])
+convertToR(convertToJava(lst))
+```
+
+A named list of length-one vectors is converted to a Java map of scalars by default. However, if `length.one.vector.as.array = TRUE`, the object is converted to a map of arrays. This results in a data frame when converted back to R.
+
+```{r}
+lst <- list(col1 = 1, col2 = "a")
+convertToR(convertToJava(lst))
+lst <- list(col1 = 1, col2 = "a")
+convertToR(convertToJava(lst, length.one.vector.as.array = TRUE))
+```
+
+### R Data Frames
+
+Data frames are converted to Java maps of arrays when `data.frame.row.major = FALSE`. If there is only one column in the data frame, the Java object will be converted back to R as a named list containing a single vector. This behavior does not apply to data frames converted to Java using `data.frame.row.major = TRUE` (the default).
+
+```{r}
+df <- data.frame(col1 = 1:3)
+convertToR(convertToJava(df, data.frame.row.major = FALSE))
+```
 
 ## R raw Values and Java byte Values # {#R_raw_Java_byte}
 

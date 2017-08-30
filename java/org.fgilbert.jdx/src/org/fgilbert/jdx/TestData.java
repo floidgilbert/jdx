@@ -1,7 +1,7 @@
 package org.fgilbert.jdx;
 
 /*
- * This class provides data for testing Java types and structures. It is used only for testing in the jsr223 project.
+ * This class provides data for testing Java types and structures. It is used by the jsr223 project.
  */
 
 import java.math.BigDecimal;

@@ -1,9 +1,7 @@
 package org.fgilbert.jdx;
 
-///re-read all comments now that we support n-dimensional arrays. remove comments about matrices
-
 /*
- * This class was written to optimize marshalling data between the JVM and R via rJava. 
+ * This class was written to optimize exchanging data between the JVM and R via rJava. 
  * A balance between performance and code clarity is the goal, but intuition has been sacrificed 
  * in many cases for the sake of speed. All code is designed to reduce the number of calls from R by rJava.   
  */
@@ -104,7 +102,7 @@ public class JavaToR {
 	}
 	
 	/*
-	 * This class is used to detect whether a collection represents a matrix.
+	 * This class is used to detect whether a collection represents an n-dimensional array.
 	 */
 	private class MaybeNdimensionalArray {
 
@@ -263,7 +261,7 @@ public class JavaToR {
 	
 	/*
 	 * IMPORTANT! Any new module-level variables must be added to methods
-	 * `initialize` and `initializeFrom`. This is kludgey to be sure, but these
+	 * `initialize` and `initializeFrom`. This is kludgy to be sure, but these
 	 * methods are used to improve performance on the R side by minimizing
 	 * expensive calls to create new object references in rJava.
 	 */
@@ -460,10 +458,10 @@ public class JavaToR {
 	 * Collections are converted to vectors, n-dimensional arrays, data frames,
 	 * or unnamed lists depending on the content. See convertCollectionToArray1D
 	 * for rules used to convert collections to vectors. Collections are
-	 * converted to matrices if it contains > 1 similarly-typed, same-length
-	 * vectors. Collections are converted to data frames if they contain
-	 * homogeneous named lists (i.e. Java maps). All other combinations of
-	 * objects/values will be converted to unnamed lists.
+	 * converted to n-dimensional arrays if they contain similarly-typed,
+	 * same-dimensional objects. Collections are converted to data frames if
+	 * they contain homogeneous named lists (i.e. Java maps). All other
+	 * combinations of objects/values will be converted to unnamed lists.
 	 */
 	private void convertCollection() {
 		Collection<?> col = (Collection<?>) this.value;
@@ -480,7 +478,7 @@ public class JavaToR {
 		/*
 		 * At this point we know it's not empty or an array. Now we iterate
 		 * through each to build an R unnamed list. Along the way, we check to
-		 * see if it can instead be converted to a matrix or data frame.
+		 * see if it can instead be converted to an n-dimensional array or data frame.
 		 */
 		Iterator<?> iter = col.iterator();
 		Object o = iter.next();
@@ -618,8 +616,10 @@ public class JavaToR {
 		return false;
 	}
 
-	// This function is called only from within convertCollection.
-	////does this function and the next one appropriately inherit warnings/exceptions?
+	/* 
+	 * This function is called only from within convertCollection. Mix of number data types are coerced to
+	 * the most general type. 
+	 */
 	private void convertCollectionToArray2D(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		/*
 		 * Set matrix dimensions.
@@ -817,7 +817,9 @@ public class JavaToR {
 	}
 	
 	/*
-	 * This function is called only from within convertCollection when dimensions > 2.
+	 * This function is called only from within convertCollection when
+	 * dimensions > 2. Mix of number data types are coerced to the most general
+	 * type.
 	 */
 	private void convertCollectionToArrayND(MaybeNdimensionalArray maybeNdimensionalArray, Object[] objects, int[] compositeTypes) {
 		/*
@@ -1034,8 +1036,8 @@ public class JavaToR {
 	/*
 	 * This function is called only from within convertCollection.
 	 * 
-	 * Converts a collection of named lists to a data frame. The data is assumed
-	 * to be validated ahead of time.
+	 * Converts a collection of named lists (i.e. rows or records) to a data
+	 * frame. The data is assumed to be validated ahead of time.
 	 */
 	private void convertCollectionToDataFrame(MaybeRowMajorDataFrame maybeRowMajorDataFrame, Object[] lists) {
 		
@@ -1565,9 +1567,10 @@ public class JavaToR {
 	
 	/*
 	 * Nashorn JavaScript returns ScriptObjectMirror objects for anything that
-	 * is not a scalar, including native JavaScript arrays. The JS arrays are
-	 * converted to vectors, matrices, or lists via convertCollection().
-	 */	
+	 * is not a scalar (e.g. native JavaScript arrays). The JS arrays are
+	 * converted to vectors, n-dimensional arrays, or lists via
+	 * convertCollection().
+	 */
 	private void convertScriptObjectMirror() {
 		ScriptObjectMirror som = (ScriptObjectMirror) this.value;
 		if (som.isArray()) {
@@ -1842,7 +1845,7 @@ public class JavaToR {
 	 * 
 	 * This method is provided to allow re-initializing an existing JavaToR
 	 * object as opposed to providing this functionality only via the
-	 * constructor. This is used for performance optimization in R: creating new
+	 * constructor. This is used for performance optimization in R; creating new
 	 * objects via rJava is expensive.
 	 */
 	public int initialize(Object value, ArrayOrder arrayOrder) {
@@ -1866,9 +1869,9 @@ public class JavaToR {
 		Class<?> cls = value.getClass();
 		
 		/*
-		 * Map Java 1D and 2D arrays of simple types to R vectors and matrices.
-		 * Arrays of other types and ragged arrays are converted to lists
-		 * of appropriate R objects, if possible.
+		 * Map Java n-dimensional arrays of simple types to R arrays. Ragged
+		 * arrays and arrays of non-simple types are converted to lists of
+		 * appropriate R objects, if possible.
 		 */
 		if (cls.isArray()) {
 			/*
