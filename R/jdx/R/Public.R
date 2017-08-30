@@ -4,7 +4,7 @@
 #///review the unit testing for jdx now that I've changed the parameters.
 #' @export
 convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.objects = FALSE, array.order = "row-major", data.frame.row.major = TRUE, coerce.factors = TRUE) {
-  
+
   # array.order is validated later.
   if (!is.logical(length.one.vector.as.array) || length(length.one.vector.as.array) != 1)
     stop("The parameter 'length.one.vector.as.array' requires a length-one logical vector.")
@@ -14,13 +14,13 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
     stop("The parameter 'data.frame.row.major' requires a length-one logical vector.")
   if (!is.logical(coerce.factors) || length(coerce.factors) != 1)
     stop("The parameter 'coerce.factors' requires a length-one logical vector.")
-  
+
   # The class AsIs (set via the function I()) can be used to indicate that
   # length one vectors/arrays/factors should be converted to arrays, not
   # scalars. It is ignored for all other structures.
   value.is.as.is <- inherits(value, "AsIs")
   length.one.vector.as.array <- length.one.vector.as.array || value.is.as.is
-  
+
   # IMPORTANT: is.vector() returns TRUE for lists. I override this behavior
   # here.
   value.is.list <- is.list(value)
@@ -45,10 +45,10 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
     if (!scalars.as.objects) {
       # From the rJava::.jbyte documentation: ".jbyte is used when a scalar byte
       # is to be passed to Java." In other words, a raw vector of length
-      # one will not be interpreted as a scalar byte value by rJava unless it is 
+      # one will not be interpreted as a scalar byte value by rJava unless it is
       # wrapped in a special class. This will be non-intuitive for the user when
-      # length.one.vector.as.array = FALSE and scalars.as.objects = FALSE because 
-      # the returned value will not be the same as the value passed in, yet it is 
+      # length.one.vector.as.array = FALSE and scalars.as.objects = FALSE because
+      # the returned value will not be the same as the value passed in, yet it is
       # not a Java object; it is an R object wrapped in a custom class. By contrast,
       # when length.one.vector.as.array = FALSE and scalars.as.objects = TRUE, the
       # returned value is a reference to a java.lang.Byte object.
@@ -127,16 +127,16 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
     }
     stop(sprintf("Invalid 'array.order' parameter: '%s'.", array.order))
   }
-  
+
   if (is.factor(value)) {
     if (coerce.factors)
       return(convertToJava(coerceFactor(value), length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = scalars.as.objects))
     return(convertToJava(as.character(value), length.one.vector.as.array = length.one.vector.as.array, scalars.as.objects = scalars.as.objects))
   }
-  
+
   if (is.null(value))
     return(rJava::.jnull())
-  
+
   if (is.data.frame(value)) {
     names <- names(value)
     if (is.null(names)) # It is possible to set names(data.frame) to NULL
@@ -234,7 +234,7 @@ getJavaClassName <- function(value) {
 # ConvertToR Low-level Interface ------------------------------------------
 
 # These functions are used by the high-level interface. They can also be used in
-# Java integrations (such as the jsr223 project) to avoid expensive rJava calls 
+# Java integrations (such as the jsr223 project) to avoid expensive rJava calls
 # during conversion that create new objects or obtain references to objects
 # (non-primitives).
 
@@ -278,12 +278,12 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
   createList <- function(x, data.code) {
 
     evalObject <- function(i) {
-      
+
       data.code <- processCompositeDataCode(j2r, types[i])
 
       if (data.code[1] == TC_NULL)
         return(NULL)
-      
+
       if (data.code[2] == SC_SCALAR) {
         if (data.code[1] == TC_RAW)
           return(as.raw(bitwAnd(rJava::.jsimplify(objects[[i]]), 0xff)))
@@ -295,8 +295,8 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
 
       #///make sure rowmajor settings work correctly in this scenario
       if (data.code[2] == SC_ND_ARRAY)
-        return(createNdimensionalArray(rJava::.jevalArray(objects[[i]])))
-      
+        return(createNdimensionalArray(rJava::.jevalArray(objects[[i]]), data.code))
+
       if (data.code[2] == SC_DATA_FRAME)
         return(createDataFrame(rJava::.jevalArray(objects[[i]])))
 
@@ -315,8 +315,8 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
       names(lst) <- rJava::.jevalArray(x[[3]], rawJNIRefSignature = "[Ljava/lang/String;")
     return(lst)
   }
-  
-  createNdimensionalArray <- function(x) {
+
+  createNdimensionalArray <- function(x, data.code) {
     dimensions <- rJava::.jevalArray(x[[1]], rawJNIRefSignature = "[I")
     # Providing `rawJNIRefSignature` is about 1/3 times faster than not.
     if (data.code[1] == TC_NUMERIC)
@@ -332,7 +332,7 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
     }
     throwUnsupportedDataCodeException(data.code)
   }
-  
+
   if (!is.null(strings.as.factors)) {
     if (!is.logical(strings.as.factors) || length(strings.as.factors) != 1)
       stop("The parameter 'strings.as.factors' requires a length-one logical vector or NULL.")
@@ -357,10 +357,10 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
     if (data.code[1] == TC_LOGICAL)
       return(rJava::.jcall(j2r, "Z", "getValueBoolean", check = FALSE))
     if (data.code[1] == TC_RAW) {
-      # Convert to raw manually. Unfortunately, rJava returns an integer vector 
-      # in this scenario. This is understandable because Java bytes range from 
-      # -128 to 127 whereas R raw values range from 0 to 255. However, this 
-      # behavior is inconsistent because rJava converts byte arrays to raw 
+      # Convert to raw manually. Unfortunately, rJava returns an integer vector
+      # in this scenario. This is understandable because Java bytes range from
+      # -128 to 127 whereas R raw values range from 0 to 255. However, this
+      # behavior is inconsistent because rJava converts byte arrays to raw
       # values without hesitation and bitwise. So Java -1 maps to R 0xff. So,
       # that leaves me in a quandry. I have decided to make the behavior between
       # the scalars and the arrays consistent.
@@ -384,8 +384,8 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
   }
 
   if (data.code[2] == SC_ND_ARRAY)
-    return(createNdimensionalArray(rJava::.jcall(j2r, "[Ljava/lang/Object;", "getValueObjectArray1d", check = FALSE)))
-  
+    return(createNdimensionalArray(rJava::.jcall(j2r, "[Ljava/lang/Object;", "getValueObjectArray1d", check = FALSE), data.code))
+
   if (data.code[2] == SC_DATA_FRAME)
     return(createDataFrame(rJava::.jcall(j2r, "[Ljava/lang/Object;", "getValueObjectArray1d", check = FALSE)))
 
@@ -404,18 +404,18 @@ createJavaToRobject <- function() {
 jdxConstants <- function() {
   list(
     ARRAY_ORDER = array.order.values
-    
+
     , EC_NONE = EC_NONE
     , EC_EXCEPTION = EC_EXCEPTION
     , EC_WARNING_MISSING_LOGICAL_VALUES = EC_WARNING_MISSING_LOGICAL_VALUES
     , EC_WARNING_MISSING_RAW_VALUES = EC_WARNING_MISSING_RAW_VALUES
-    
+
     , MSG_WARNING_MISSING_LOGICAL_VALUES = MSG_WARNING_MISSING_LOGICAL_VALUES
     , MSG_WARNING_MISSING_RAW_VALUES = MSG_WARNING_MISSING_RAW_VALUES
-    
+
     , NA_ASSUMPTION_LOGICAL = NA_ASSUMPTION_LOGICAL
     , NA_ASSUMPTION_RAW = NA_ASSUMPTION_RAW
-    
+
     , SC_SCALAR = SC_SCALAR
     , SC_VECTOR = SC_VECTOR
     # , SC_MATRIX = SC_MATRIX
@@ -424,7 +424,7 @@ jdxConstants <- function() {
     , SC_LIST = SC_LIST
     , SC_NAMED_LIST = SC_NAMED_LIST
     , SC_USER_DEFINED = SC_USER_DEFINED
-    
+
     , TC_NULL = TC_NULL
     , TC_NUMERIC = TC_NUMERIC
     , TC_INTEGER = TC_INTEGER

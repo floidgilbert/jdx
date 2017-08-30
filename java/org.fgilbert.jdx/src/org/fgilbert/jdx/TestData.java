@@ -1162,6 +1162,27 @@ public class TestData {
 	}
 	
 
+	// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // 
+	// BOXED ARRAYS 3D
+	// // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+
+	public static Boolean[][][] getBoxedBooleanArray3dNulls() {
+	    return new Boolean[][][] {{{false, true}, {true, null}, {false, true}}, {{false, true}, {true, true}, {false, true}}};
+	}
+
+	public static Boolean[][][] getBoxedBooleanArray3dRagged() {
+		return new Boolean[][][] {{{true, false}, {}, {false}, {true}}, {{true, false}, {true}, {false}, {true}}};
+	}
+
+
+	public static Byte[][][] getBoxedByteArray3dNulls() {
+	    return new Byte[][][] {{{Byte.MIN_VALUE, Byte.MAX_VALUE}, {Byte.MIN_VALUE, null}, {Byte.MIN_VALUE, Byte.MAX_VALUE}}, {{Byte.MIN_VALUE, Byte.MAX_VALUE}, {Byte.MIN_VALUE, Byte.MIN_VALUE}, {Byte.MIN_VALUE, Byte.MAX_VALUE}}};
+	}
+
+	public static Byte[][][] getBoxedByteArray3dRagged() {
+		return new Byte[][][] {{{Byte.MIN_VALUE}, {}, {0, Byte.MAX_VALUE}}, {{Byte.MIN_VALUE}, {1}, {0, Byte.MAX_VALUE}}};
+	}
+	
 	
 	// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // 
 	// COLLECTION
