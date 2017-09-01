@@ -25,7 +25,7 @@ The jdx package converts R data structures to generic Java objects and vice vers
 
 For sites that plan on designing and distributing packages that depend on jdx, it may be helpful to know that jdx does not use or load rJava's companion package JRI (the Java/R Interface).
 
-**Note**: The jdx package behavior diverges from rJava somewhat for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information.
+**NOTE**: The jdx package behavior diverges from rJava somewhat for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information.
 
 ## Primary Functions
 
@@ -57,7 +57,9 @@ identical(m1, m2)
 
 The jdx package provides a single function, `convertToJava()`, to handle conversion for all R objects. This design facilitates dynamically-typed programming. Consider, for example, an overloaded Java method `setValue()` that has different method signatures for a wide variety of data types and structures. If we use `rJava::.jcall(object, "V", "setValue", convertToJava(value))` to call `setValue()`, the Java method with the correct signature is automatically selected based on the return value of `convertToJava()`.
 
-**IMPORTANT:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
+**NOTE:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
+
+**NOTE:** When vectors or n-dimensional arrays are copied to Java, names are not preserved. Column names for data frames are preserved, but row names are not.
 
 The `convertToJava()` function provides several data conversion parameters:
 
@@ -152,13 +154,13 @@ The jdx package supports data exchange for matrices and other n-dimensional arra
 
 Now we describe the each of the `array.order` options.
 
-+ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as large objects containing smaller objects.
++ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
 
 + `'column-major'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][column][row]`. This ordering scheme is natural for Java programmers: the data contained in the one-dimensional arrays represent columns of the parent matrix.
 
 + `'row-major-java'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][row][column]`. This provides Java programmers with a natural indexing scheme where the arrays at the one-dimensional level represent rows of the parent matrix. For matrices, `'row-major-java'` and `'row-major'` are equivalent.
 
-**IMPORTANT:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
+**NOTE:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
 
 R supports empty multidimensional structures that cannot always be reproduced exactly in Java. Consider an R matrix with one row and zero columns: `m <- array(0, c(1, 0))`. If this matrix is converted to Java using row-major order, the resulting array is `{{}}`: a structure with one empty row. The `convertToR()` function can convert this array back to the same R matrix exactly. However, if the matrix is converted using column-major order the resulting array is `{}` because there are zero column structures. The `convertToR()` function will convert this array back to an R matrix of `array(0, c(0, 0))`.
 
@@ -238,7 +240,7 @@ pander::pander(
 
 The `convertToR()` function converts one-dimensional Java arrays to R vectors and it converts n-dimensional rectangular Java arrays to n-dimensional R arrays. The `array.order` parameter controls index ordering for n-dimensional arrays. The behavior of `array.order` is the same as in `convertToJava()`. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for details.
 
-**IMPORTANT:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
+**NOTE:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
 
 R supports empty multidimensional structures that cannot always be reproduced exactly in Java. Consider an R matrix with one row and zero columns: `m <- array(0, c(1, 0))`. If this matrix is converted to Java using row-major order, the resulting array is `{{}}`: a structure with one empty row. The `convertToR()` function can convert this array back to the same R matrix exactly. However, if the matrix is converted using column-major order the resulting array is `{}` because there are zero column structures. The `convertToR()` function will convert this array back to an R matrix of `array(0, c(0, 0))`.
 
