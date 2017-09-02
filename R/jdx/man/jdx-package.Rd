@@ -56,3 +56,5 @@ identical(pi, convertToR(convertToJava(pi, scalars.as.objects = TRUE)))
 }
 
 \keyword{ package }
+\keyword{ programming }
+\keyword{ interface }
