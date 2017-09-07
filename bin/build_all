@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd ../R
+R CMD build jdx
+R CMD INSTALL --preclean --no-multiarch --with-keep.source jdx
+cd ../bin
