@@ -1,11 +1,16 @@
 Build and release instructions for jdx. Instructions are specific to RStudio and Eclipse IDE for Java.
 
-- Make sure rmarkdown package is installed. Otherwise, the TOC and styles for the vignette will not be produced corectly.
+- Make sure the following packages are installed/updated.
+
+  rmarkdown
+  pander
+  roxygen2
+  testthat
 
 - Close all sessions using the package.
 
 - Uninstall jdx: `remove.packages("jdx")`. Sometimes the JAR files fail to update during build in RStudio.
-    
+
 - In Java project...
 
 --- If changing the major and minor (not build) version numbers, change the version numbers for JAR file names.
