@@ -63,7 +63,7 @@ A logical value indicating whether to raise a specific warning.
 }
 
 \details{
-See the code examples for a thread-safe alternative to \code{\link{javaToR}}. This functional interface is awkward, but it was designed to limit type inference and the number of transactions between R and the JVM to maximize performance for \pkg{jsr223}.
+See the code examples below for a thread-safe alternative to \code{\link{convertToR}}. The low-level functional interface presented here is awkward, but it was designed to limit type inference and the number of transactions between R and the JVM, ultimately maximizing performance for \pkg{jsr223}.
 }
 
 \seealso{
