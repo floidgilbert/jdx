@@ -6,6 +6,7 @@ output:
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Introduction to jdx}
+  %\VignetteEncoding{UTF-8}
   %\usepackage[utf8]{inputenc}
 ---
 
