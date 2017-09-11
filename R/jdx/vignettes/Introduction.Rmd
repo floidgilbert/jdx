@@ -62,6 +62,7 @@ The jdx package provides a single function, `convertToJava()`, to handle convers
 
 **DBD: This seems too technical here while a reader is just trying to understand the usage of the package.**
 **NOTE:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
+**DBD: It's strikes be as weird that the first 'l' in 'lowLevel' is not capitalized.**
 
 **NOTE:** When vectors or n-dimensional arrays are copied to Java, names are not preserved. Column names for data frames are preserved, but row names are not.  **DBD: I suppose this was a design choice, but some justification (either practical or technical) would be interesting.  Also, you could provide an example showing how to transfer names seperately as an array of strings.**
 
