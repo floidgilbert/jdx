@@ -24,15 +24,11 @@ The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbane
 
 The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including various orderings for arrays and data frames.
 
-**DBD: Both of these next paragraphs are quite technical and feel out of place here.  I understand that you are trying to alert an rJava expert, but it will be lost of most people.  Maybe just combine the two paragraphs and add a leading sentence like, "For those familar with the technical details of rJava, we note two important aspects of the design of jdx that are discussed in more detail later.  First, ..."**
-
-For sites that plan on designing and distributing packages that depend on jdx, it may be helpful to know that jdx does not use or load rJava's companion package JRI (the Java/R Interface).
-
-**NOTE**: The jdx package behavior diverges from rJava somewhat for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information.
+For those familar with the technical details of rJava, here are two important notes to consider. First, the jdx package behavior diverges from rJava for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information. Second, for sites that plan on designing and distributing packages that depend on jdx, jdx does not use or load rJava's companion package JRI (the Java/R Interface).
 
 ## Primary Functions
 
-The example below demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`.  **DBD:  Have you thought about using shorter function names toJava, toR, and javaClassName?**  **DBD: I find this next sentence confusing because there isn't a lot of context.  I suggest breaking up the example with prose designed to walk the reader through it.  This can include moving the R comments to manuscript text.** Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default, but row-major-java and column-major ordering is also available.  ***DBD: I'm confused about the three orderings.  I'd expect two orderings.  Perhaps you don't mention ordering here, or you just mention that it will be discussed later.**
+The example below demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default, but other ordering options are also available.///break this example into prose.///
 
 ```{r}
 library("jdx")
@@ -60,11 +56,9 @@ identical(m1, m2)
 
 The jdx package provides a single function, `convertToJava()`, to handle conversion for all R objects. This design facilitates dynamically-typed programming. Consider, for example, an overloaded Java method `setValue()` that has different method signatures for a wide variety of data types and structures. If we use `rJava::.jcall(object, "V", "setValue", convertToJava(value))` to call `setValue()`, the Java method with the correct signature is automatically selected based on the return value of `convertToJava()`.
 
-**DBD: This seems too technical here while a reader is just trying to understand the usage of the package.**
-**NOTE:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
-**DBD: It's strikes be as weird that the first 'l' in 'lowLevel' is not capitalized.**
+**NOTE:** When vectors or n-dimensional arrays are copied to Java, names are not preserved. Column names for data frames are preserved, but row names are not.
 
-**NOTE:** When vectors or n-dimensional arrays are copied to Java, names are not preserved. Column names for data frames are preserved, but row names are not.  **DBD: I suppose this was a design choice, but some justification (either practical or technical) would be interesting.  Also, you could provide an example showing how to transfer names seperately as an array of strings.**
+**NOTE:** The `convertToR()` function is not thread-safe. Do not simultaneously call `convertToR()` from different threads in the same process. A thread-safe alternative is presented in the R documentation for `convertToRlowLevel()`.
 
 The `convertToJava()` function provides several data conversion parameters:
 
@@ -92,8 +86,6 @@ If `length.one.vector.as.array = FALSE` and `scalars.as.objects = TRUE`, length-
 The following two tables detail the behavior of `convertToJava()` for length-one vectors when `length.one.vector.as.array = FALSE`.
 
 **NOTE:** The `logical` value `NA` is coerced to Java `false` with a warning.
-
-**DBD: The comments for the tables below look ugly.  Perhaps there is nothing you can do with R markdown to improve the look.  Or maybe you find another way to provide the comments outside of the table...**
 
 ```{r results='asis', echo=FALSE}
 # load(rdata.tables)
@@ -159,8 +151,6 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 The jdx package supports data exchange for matrices and other n-dimensional arrays. Several array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'row-major-java'`. Before describing these schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion. R n-dimensional arrays, on the other hand, are stored in memory as a vector and the data is retrieved in the appropriate order using indexing arithmetic.
 
-**DBD: I think I am confused about row major vs. column major order.  People say that R is column major, whereas you imply below that R is row major.  See the first table after "Problem 1" at https://modelingguru.nasa.gov/docs/DOC-2625 **
-
 Now we describe the each of the `array.order` options.
 
 + `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
@@ -199,9 +189,11 @@ When `data.frame.row.major = FALSE`, `convertToJava()` creates a `LinkedHashMap<
 
 **NOTE:** The jdx package uses row-major ordering by default because of its popularity. However, column-major structures are much faster to create and they often present a performance advantage for calculations.
 
+Row names for data frames are not preserved during conversion. To include row names in the conversion, simply add them as a column in your data frame. We do not automatically include row names in conversion because it would require us to create an additional element in the Java map with a reserved key value such as `_row`. Instead, we leave the decision of how to handle row names up to the developer.
+
 ### R Lists and Environments
 
-The jdx package supports data exchange for lists, named lists, nested lists (i.e., lists containing other lists), and environments.  **DBD: Does that include lists of matrices, for example?**  The `convertToJava()` function converts R lists to Java `ArrayList<Object>` objects. It converts named lists and `environment` objects to Java `LinkedHashMap<String, Object>` objects. The `ArrayList` and `LinkedHashMap` objects implement the Java `Collection` and `Map` interfaces, respectively. These interfaces are ubiquitous in the Java API.
+The jdx package supports data exchange for lists, named lists, nested lists (i.e., lists containing other lists), and environments. Lists can contain any jdx-supported R object. The `convertToJava()` function converts R lists to Java `ArrayList<Object>` objects. It converts named lists and `environment` objects to Java `LinkedHashMap<String, Object>` objects. The `ArrayList` and `LinkedHashMap` objects implement the Java `Collection` and `Map` interfaces, respectively. These interfaces are ubiquitous in the Java API.
 
 **NOTE:** If `lst` is an R list, `convertToR(convertToJava(lst))` may not result in a list. See [Conversion Issues](#conversion_issues) for details.
 
