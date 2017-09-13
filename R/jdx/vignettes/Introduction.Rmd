@@ -28,18 +28,30 @@ For those familar with the technical details of rJava, here are two important no
 
 ## Primary Functions
 
-The example below demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default, but other ordering options are also available.///break this example into prose.///
+The example in this section demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. First, create a 2 x 3 integer matrix:
+
+```{r}
+m1 <- matrix(1:6, 2, 3)
+m1
+```
+
+Next, load the jdx library and use `convertToJava()` to convert the matrix to a two-dimensional Java array (`int[][]`). The resulting object is an rJava reference that points to the new Java object. The last line returns the R class information for the reference object.
 
 ```{r}
 library("jdx")
-m1 <- matrix(1:6, 2, 3)
-m1
-# Convert the matrix to a Java two-dimensional array (int[][]).
 o <- convertToJava(m1)
+class(o)
+```
 
-# Display the class name.
+The `getJavaClassName()` function returns the class name of the Java object. In this example, the clase name is `[[I`, Java's shorthand for `int[][]`.
+
+```{r}
 getJavaClassName(o)
+```
 
+Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default, but other ordering options are also available.///break this example into prose.///
+
+```{r}
 # Use rJava::.jcall to invoke the java.util.Arrays.deepToString
 # method. deepToString requires a parameter of Object[]. Cast
 # our int[][] array to Object[] before calling the method.
@@ -153,7 +165,7 @@ The jdx package supports data exchange for matrices and other n-dimensional arra
 
 Now we describe the each of the `array.order` options.
 
-+ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
++ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this indexing scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
 
 + `'column-major'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][column][row]`. This ordering scheme is natural for Java programmers: the data contained in the one-dimensional arrays represent columns of the parent matrix.
 
