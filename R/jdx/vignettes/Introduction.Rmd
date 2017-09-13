@@ -280,7 +280,7 @@ The `strings.as.factors` parameter of the `convertToR()` function controls wheth
 
 ### Java Collections # {#java_collections}
 
-Java objects implementing the `Collection` interface can be converted to vectors, n-dimensional arrays, data frames, and unnamed lists. Conversions rules are delineated in the table below. Many of these rules arise from the fact that JavaScript arrays are implemented as collections. Hence, jdx attempts to make collections behave as arrays wherever possible. (Remember, jdx was developed primarily for jsr223, the high-level scripting interface for Java and R.) This is also natural for Java programmers accustomed to switching between array-based and collection-based APIs.
+Java objects implementing the `Collection` interface can be converted to vectors, n-dimensional arrays, data frames, and unnamed lists. Conversions rules are delineated in the table below. Many of these rules arise from the fact that JavaScript arrays are implemented as collections. Hence, jdx attempts to make collections behave as arrays wherever possible. (Remember, jdx was developed primarily for jsr223, a high-level scripting interface for Java and R.) This is also natural for Java programmers accustomed to switching between array-based and collection-based APIs.
 
 The `convertToR()` parameters `array.order` and `strings.as.factors` behave the same way for objects converted from collections as they do elsewhere. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for a description of the `array.order` parameter. Refer to [Java Maps](#java_maps) for details relating to `strings.as.factors`.
 
