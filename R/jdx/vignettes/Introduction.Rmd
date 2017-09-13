@@ -310,7 +310,7 @@ If `lst` is an R list, `convertToR(convertToJava(lst))` may not result in a list
 
 **NOTE:** Many of the common conversion issues related to unnamed lists can be avoided by using named lists.
 
-A list of scalars (i.e., length-one vectors) converted to Java will be converted back to R as a vector if the data types are considered compatible. See the conversion table in [Java Collections](#java_collections)) for data types that are considered compatible. In the following example, a list containing numeric, integer, and raw values, are converted to a Java collection containing `double`, `int`, and `byte` values, respectively. The Java collection is converted back to R as a numeric vector because these number types are considered compatible.
+A list of scalars (i.e., length-one vectors) converted to Java will be converted back to R as a vector if the data types are considered compatible. See the conversion table in [Java Collections](#java_collections) for data types that are considered compatible. In the following example, a list containing numeric, integer, and raw values, are converted to a Java collection containing `double`, `int`, and `byte` values, respectively. The Java collection is converted back to R as a numeric vector because these number types are considered compatible.
 
 ```{r}
 lst <- list(1.1, 2L, as.raw(3))
