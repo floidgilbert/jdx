@@ -24,42 +24,35 @@ The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbane
 
 The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including various orderings for arrays and data frames.
 
-For those familar with the technical details of rJava, here are two important notes to consider. First, the jdx package behavior diverges from rJava for `raw` values and Java values of type `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information. Second, for sites that plan on designing and distributing packages that depend on jdx, jdx does not use or load rJava's companion package JRI (the Java/R Interface).
+For those familar with the technical details of rJava, here are two important notes to consider. First, the jdx package behavior diverges from rJava for `raw` values and Java types `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information. Second, jdx does not use or load rJava's companion package JRI (the Java/R Interface).
 
 ## Primary Functions
 
-The example in this section demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. First, create a 2 x 3 integer matrix:
+This section demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. In our example, we use a simple 2 x 3 matrix:
 
 ```{r}
 m1 <- matrix(1:6, 2, 3)
 m1
 ```
 
-Next, load the jdx library and use `convertToJava()` to convert the matrix to a two-dimensional Java array (`int[][]`). The resulting object is an rJava reference that points to the new Java object. The last line returns the R class information for the reference object.
+Next, we load the jdx library and use `convertToJava()` to convert the R matrix to a two-dimensional Java array. The return value of the function is an rJava reference object that points to the new Java object. The `getJavaClassName()` function returns the class name of the Java object. In this case, the class name is `[[I`, Java's shorthand for a two-dimensional integer array.
 
 ```{r}
 library("jdx")
 o <- convertToJava(m1)
-class(o)
-```
-
-The `getJavaClassName()` function returns the class name of the Java object. In this example, the clase name is `[[I`, Java's shorthand for `int[][]`.
-
-```{r}
 getJavaClassName(o)
 ```
 
-Notice that the call to `Arrays.deepToString()` reveals that `convertToJava()` uses row-major ordering by default, but other ordering options are also available.///break this example into prose.///
+The object reference can be used as a parameter for any rJava method. Here, we use `rJava::.jcall()` to invoke the static method `java.util.Arrays.deepToString()`. This method returns a string representation for multi-dimensional arrays. Its first parameter expects a one-dimensional array of `java.lang.Object`, so we cast our reference before calling `deepToString()`. The output reveals that `convertToJava()` uses row-major ordering by default when converting arrays. Other ordering options are also available.
 
 ```{r}
-# Use rJava::.jcall to invoke the java.util.Arrays.deepToString
-# method. deepToString requires a parameter of Object[]. Cast
-# our int[][] array to Object[] before calling the method.
 o <- rJava::.jcast(o, "[Ljava/lang/Object;")
 rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
+```
 
-# Convert the Java array back to an R matrix and show that
-# it is identical to the original copy.
+Finally, we convert the Java array back to an R matrix using `convertToR()`. The last line shows that the result is identical to the original R matrix.
+
+```{r}
 m2 <- convertToR(o)
 identical(m1, m2)
 ```
