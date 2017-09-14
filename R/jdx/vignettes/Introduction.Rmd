@@ -160,11 +160,25 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 ### R Matrices and N-dimensional Arrays # {#r_n_dimensional_arrays}
 
-The jdx package supports data exchange for matrices and other n-dimensional arrays. Several array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'row-major-java'`. Before describing these schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion. R n-dimensional arrays, on the other hand, are stored in memory as a vector and the data is retrieved in the appropriate order using indexing arithmetic.
+///reference Ilife arrays?
+
+The jdx package supports data exchange for matrices and other n-dimensional arrays. Several array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'row-major-java'`. Before describing these schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion. R n-dimensional arrays, on the other hand, are stored in memory as a vector and the data are retrieved in the appropriate order using indexing arithmetic.
 
 Now we describe the each of the `array.order` options.
 
-+ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this indexing scheme. However, this scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
+///https://en.wikipedia.org/wiki/Array_data_structure#Multidimensional_arrays under Compact layouts
+///https://en.wikipedia.org/wiki/Iliffe_vector
+///https://en.wikipedia.org/wiki/Row-_and_column-major_order
+
+///A way to represent items in a N-dimensional array in the 1-dimensional computer memory. In column-major order, the leftmost index “varies the fastest”: for example the array:
+
+///A way to represent items in a N-dimensional array in the 1-dimensional computer memory. In row-major order, the rightmost index “varies the fastest”: for example the array:
+
+///For arrays with three or more indices, "row major order" puts in consecutive positions any two elements whose index tuples differ only by one in the last index. "Column major order" is analogous with respect to the first index.
+
+///https://docs.scipy.org/doc/numpy/glossary.html#term-row-major
+
++ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this indexing scheme (despite the fact that R stores the data in column-major order). This row-major scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
 
 + `'column-major'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][column][row]`. This ordering scheme is natural for Java programmers: the data contained in the one-dimensional arrays represent columns of the parent matrix.
 
