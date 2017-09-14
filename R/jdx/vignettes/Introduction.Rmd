@@ -26,6 +26,12 @@ The jdx package converts R data structures to generic Java objects and vice vers
 
 For those familar with the technical details of rJava, here are two important notes to consider. First, the jdx package behavior diverges from rJava for `raw` values and Java types `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information. Second, jdx does not use or load rJava's companion package JRI (the Java/R Interface).
 
+## Installation
+
+The jdx package requires Java 8 Standard Edition or above. The current version of the Java Runtime Environment (JRE) can be determined by executing `java -version` from a system command prompt. Java 8 is denoted by version 1.8.x_xx. The JRE can be obtained from [Oracle's web site](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html). Select the architecture (32 or 64 bit) that matches your R installation.
+
+The jdx package runs on a standard installation of R (e.g., the R build option `--enable-R-shlib` is not required).  Install jdx with the usual command: `install.packages("jdx")`.
+
 ## Primary Functions
 
 This section demonstrates the three primary functions in jdx: `convertToJava()`, `convertToR()`, and `getJavaClassName()`. In our example, we use a simple 2 x 3 matrix:
