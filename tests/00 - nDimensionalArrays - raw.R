@@ -313,23 +313,23 @@ expect_identical(convertToR(convertToJava(a, array.order = "column-major"), arra
 
 
 
-# Row-major-java ----------------------------------------------------------
+# column-minor ----------------------------------------------------------
 
 # One-dimensional
 for (i in 0:5) {
   a <- array(as.raw(1:i), c(i))
   a.i <- array(1:i, c(i))
-  o <- convertToJava(a, length.one.vector.as.array = TRUE, array.order = "row-major-java")
+  o <- convertToJava(a, length.one.vector.as.array = TRUE, array.order = "column-minor")
   s1 <- rJava::.jcall("java/util/Arrays", "S", "toString", o)
   s1 <- gsub(" ", "", s1)
   s2 <- as.character(toJSON(a.i))
   # cat(s1, "\n")
   # cat(s2, "\n\n")
   expect_identical(s1, s2)
-  expect_identical(convertToR(o, array.order = "row-major-java"), as.raw(a))
+  expect_identical(convertToR(o, array.order = "column-minor"), as.raw(a))
   if (i != 0) {
     p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
-    expect_identical(convertToR(p, array.order = "row-major-java"), as.raw(a))
+    expect_identical(convertToR(p, array.order = "column-minor"), as.raw(a))
   }
 }
 
@@ -338,7 +338,7 @@ for (i in 0:5) {
   for (j in 0:5) {
     a <- array(as.raw(1:(i * j)), c(i, j))
     a.i <- array(1:(i * j), c(i, j))
-    o <- convertToJava(a, array.order = "row-major-java")
+    o <- convertToJava(a, array.order = "column-minor")
     o <- rJava::.jcast(o, "[Ljava/lang/Object;")
     s1 <- rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
     s1 <- gsub(" ", "", s1)
@@ -347,12 +347,12 @@ for (i in 0:5) {
     # cat(s2, "\n\n")
     expect_identical(s1, s2)
     if (i == 0) {
-      expect_identical(convertToR(o, array.order = "row-major-java"), array(raw(0), c(0, 0)))
+      expect_identical(convertToR(o, array.order = "column-minor"), array(raw(0), c(0, 0)))
     } else {
-      expect_identical(convertToR(o, array.order = "row-major-java"), a)
+      expect_identical(convertToR(o, array.order = "column-minor"), a)
       if (j != 0) {
         p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
-        expect_identical(convertToR(p, array.order = "row-major-java"), a)
+        expect_identical(convertToR(p, array.order = "column-minor"), a)
       }
     }
   }
@@ -370,7 +370,7 @@ for (i in 0:5) {
         for (q in 1:k)
           b[, , q] <- t(a.i[, , q])
       }
-      o <- convertToJava(a, array.order = "row-major-java")
+      o <- convertToJava(a, array.order = "column-minor")
       o <- rJava::.jcast(o, "[Ljava/lang/Object;")
       s1 <- rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
       s1 <- gsub(" ", "", s1)
@@ -379,14 +379,14 @@ for (i in 0:5) {
       # cat(s2, "\n\n")
       expect_identical(s1, s2)
       if (k == 0) {
-        expect_identical(convertToR(o, array.order = "row-major-java"), array(raw(0), c(0, 0, 0)))
+        expect_identical(convertToR(o, array.order = "column-minor"), array(raw(0), c(0, 0, 0)))
       } else if (k > 0 & i == 0) {
-        expect_identical(convertToR(o, array.order = "row-major-java"), array(raw(0), c(0, 0, k)))
+        expect_identical(convertToR(o, array.order = "column-minor"), array(raw(0), c(0, 0, k)))
       } else {
-        expect_identical(convertToR(o, array.order = "row-major-java"), a)
+        expect_identical(convertToR(o, array.order = "column-minor"), a)
         if (i * j * k != 0) {
           p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
-          expect_identical(convertToR(p, array.order = "row-major-java"), a)
+          expect_identical(convertToR(p, array.order = "column-minor"), a)
         }
       }
     }
@@ -409,7 +409,7 @@ for (i in 0:5) {
             }
           }
         }
-        o <- convertToJava(a, array.order = "row-major-java")
+        o <- convertToJava(a, array.order = "column-minor")
         o <- rJava::.jcast(o, "[Ljava/lang/Object;")
         s1 <- rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
         s1 <- gsub(" ", "", s1)
@@ -418,10 +418,10 @@ for (i in 0:5) {
         # cat(s2, "\n\n")
         expect_identical(s1, s2)
         if (i * k * l != 0) {
-          expect_identical(convertToR(o, array.order = "row-major-java"), a)
+          expect_identical(convertToR(o, array.order = "column-minor"), a)
           if (j != 0) {
             p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
-            expect_identical(convertToR(p, array.order = "row-major-java"), a)
+            expect_identical(convertToR(p, array.order = "column-minor"), a)
           }
         }
       }
@@ -429,15 +429,15 @@ for (i in 0:5) {
   }
 }
 a <- array(as.raw(0L), c(0, 0, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), a)
 a <- array(as.raw(0L), c(0, 1, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 1, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 1, 1)))
 a <- array(as.raw(0L), c(1, 1, 0, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 0, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 0, 1)))
 a <- array(as.raw(0L), c(1, 0, 0, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 0, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 0, 1)))
 a <- array(as.raw(0L), c(1, 0, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(1, 0, 1, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(1, 0, 1, 1)))
 
 # Five-dimensional
 for (i in 0:5) {
@@ -456,7 +456,7 @@ for (i in 0:5) {
               }
             }
           }
-          o <- convertToJava(a, array.order = "row-major-java")
+          o <- convertToJava(a, array.order = "column-minor")
           o <- rJava::.jcast(o, "[Ljava/lang/Object;")
           s1 <- rJava::.jcall("java/util/Arrays", "S", "deepToString", o)
           s1 <- gsub(" ", "", s1)
@@ -465,10 +465,10 @@ for (i in 0:5) {
           # cat(s2, "\n\n")
           expect_identical(s1, s2)
           if (i * k * l * m != 0) {
-            expect_identical(convertToR(o, array.order = "row-major-java"), a)
+            expect_identical(convertToR(o, array.order = "column-minor"), a)
             if (j != 0) {
               p <- rJava::.jcall(jdx:::jdx.utility, "Ljava/util/List;", "deepAsList", rJava::.jcast(o))
-              expect_identical(convertToR(p, array.order = "row-major-java"), a)
+              expect_identical(convertToR(p, array.order = "column-minor"), a)
             }
           }
         }
@@ -477,14 +477,14 @@ for (i in 0:5) {
   }
 }
 a <- array(as.raw(0L), c(0, 0, 0, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), a)
 a <- array(as.raw(0L), c(0, 0, 1, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), a)
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), a)
 a <- array(as.raw(0L), c(0, 1, 1, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 1, 1, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 1, 1, 1)))
 a <- array(as.raw(0L), c(0, 1, 1, 0, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 0, 0, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 0, 0, 1)))
 a <- array(as.raw(0L), c(0, 1, 0, 0, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 0, 0, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 0, 0, 1)))
 a <- array(as.raw(0L), c(0, 1, 0, 1, 1))
-expect_identical(convertToR(convertToJava(a, array.order = "row-major-java"), array.order = "row-major-java"), array(as.raw(0L), c(0, 0, 0, 1, 1)))
+expect_identical(convertToR(convertToJava(a, array.order = "column-minor"), array.order = "column-minor"), array(as.raw(0L), c(0, 0, 0, 1, 1)))

@@ -1,5 +1,5 @@
-library(testthat)
-library(jdx)
+# library(testthat)
+# library(jdx)
 
 # Comprehensive data testing is done in the jsr223 package, instead of here, for
 # a two reasons. First, the tests are much easier to write with the help of

@@ -36,8 +36,8 @@ public class JavaToR {
 	
 	public enum ArrayOrder {
 		COLUMN_MAJOR
+		, COLUMN_MINOR
 		, ROW_MAJOR
-		, ROW_MAJOR_JAVA
 	}
 	
 	/*
@@ -627,7 +627,7 @@ public class JavaToR {
 		int subarrayLength = maybeNdimensionalArray.getSubarrayDimensions()[0];
 		switch (this.arrayOrder) {
 		case ROW_MAJOR:
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			this.dimensions = new int[] {objects.length, subarrayLength};
 			break;
 		case COLUMN_MAJOR:
@@ -652,7 +652,7 @@ public class JavaToR {
 			double[] flatArrayDouble = new double[flatArrayLength];
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				int rows = objects.length;
 				for (int i = 0; i < rows; i++) {
 					dataTypeCodeInt = compositeTypes[i] & 0xFF;
@@ -701,7 +701,7 @@ public class JavaToR {
 			int[] flatArrayInt = new int[flatArrayLength];
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				int rows = objects.length;
 				for (int i = 0; i < rows; i++) {
 					dataTypeCodeInt = compositeTypes[i] & 0xFF;
@@ -742,7 +742,7 @@ public class JavaToR {
 			String[] flatArrayString = new String[flatArrayLength];
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				int rows = objects.length;
 				for (int i = 0; i < rows; i++) {
 					subarrayString = (String[]) objects[i];
@@ -765,7 +765,7 @@ public class JavaToR {
 			boolean[] flatArrayBoolean = new boolean[flatArrayLength];
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				int rows = objects.length;
 				for (int i = 0; i < rows; i++) {
 					subarrayBoolean = (boolean[]) objects[i];
@@ -788,7 +788,7 @@ public class JavaToR {
 			byte[] flatArrayByte = new byte[flatArrayLength];
 			switch (this.arrayOrder) {
 			case ROW_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				int rows = objects.length;
 				for (int i = 0; i < rows; i++) {
 					subarrayByte = (byte[]) objects[i];
@@ -833,7 +833,7 @@ public class JavaToR {
 			for (int i = 0; i < subarrayDimensions.length; i++)
 				this.dimensions[i + 1] = subarrayDimensions[i]; 
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 		case COLUMN_MAJOR:
 			this.dimensions = Arrays.copyOf(subarrayDimensions, subarrayDimensions.length + 1);
 			this.dimensions[this.dimensions.length - 1] = objects.length;
@@ -884,7 +884,7 @@ public class JavaToR {
 				}
 				break;
 			case COLUMN_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int i = 0; i < objects.length; i++) {
 					Object[] ndObject = (Object[]) objects[i];
 					dataTypeCodeInt = compositeTypes[i] & 0xFF;
@@ -931,7 +931,7 @@ public class JavaToR {
 				}
 				break;
 			case COLUMN_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int i = 0; i < objects.length; i++) {
 					Object[] ndObject = (Object[]) objects[i];
 					dataTypeCodeInt = compositeTypes[i] & 0xFF;
@@ -964,7 +964,7 @@ public class JavaToR {
 				}
 				break;
 			case COLUMN_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int i = 0; i < objects.length; i++) {
 					Object[] ndObject = (Object[]) objects[i];
 					arrayDataString = (String[]) ndObject[1];
@@ -988,7 +988,7 @@ public class JavaToR {
 				}
 				break;
 			case COLUMN_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int i = 0; i < objects.length; i++) {
 					Object[] ndObject = (Object[]) objects[i];
 					arrayDataBoolean = (boolean[]) ndObject[1];
@@ -1012,7 +1012,7 @@ public class JavaToR {
 				}
 				break;
 			case COLUMN_MAJOR:
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int i = 0; i < objects.length; i++) {
 					Object[] ndObject = (Object[]) objects[i];
 					arrayDataByte = (byte[]) ndObject[1];
@@ -1156,7 +1156,7 @@ public class JavaToR {
 		if (subarrayLength != 0)
 			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
+		// These three variables are used only for COLUMN_MINOR
 		int rowCount = this.dimensions[this.dimensions.length - 2];
 		int columnCount = this.dimensions[this.dimensions.length - 1];
 		int matrixIndex = 0;
@@ -1193,7 +1193,7 @@ public class JavaToR {
 					currentSubarrayIndex[j] = 0;
 				}
 				break;
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int j = 0; j < columnCount; j++)
 					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
 				if ((i + 1) % rowCount == 0) {
@@ -1219,7 +1219,7 @@ public class JavaToR {
 		case COLUMN_MAJOR:
 			Utility.reverseArray(this.dimensions);
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			int swap = this.dimensions[this.dimensions.length - 1];
 			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
 			this.dimensions[this.dimensions.length - 2] = swap;
@@ -1240,7 +1240,7 @@ public class JavaToR {
 		if (subarrayLength != 0)
 			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
+		// These three variables are used only for COLUMN_MINOR
 		int rowCount = this.dimensions[this.dimensions.length - 2];
 		int columnCount = this.dimensions[this.dimensions.length - 1];
 		int matrixIndex = 0;
@@ -1277,7 +1277,7 @@ public class JavaToR {
 					currentSubarrayIndex[j] = 0;
 				}
 				break;
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int j = 0; j < columnCount; j++)
 					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
 				if ((i + 1) % rowCount == 0) {
@@ -1303,7 +1303,7 @@ public class JavaToR {
 		case COLUMN_MAJOR:
 			Utility.reverseArray(this.dimensions);
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			int swap = this.dimensions[this.dimensions.length - 1];
 			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
 			this.dimensions[this.dimensions.length - 2] = swap;
@@ -1324,7 +1324,7 @@ public class JavaToR {
 		if (subarrayLength != 0)
 			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
+		// These three variables are used only for COLUMN_MINOR
 		int rowCount = this.dimensions[this.dimensions.length - 2];
 		int columnCount = this.dimensions[this.dimensions.length - 1];
 		int matrixIndex = 0;
@@ -1361,7 +1361,7 @@ public class JavaToR {
 					currentSubarrayIndex[j] = 0;
 				}
 				break;
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int j = 0; j < columnCount; j++)
 					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
 				if ((i + 1) % rowCount == 0) {
@@ -1387,7 +1387,7 @@ public class JavaToR {
 		case COLUMN_MAJOR:
 			Utility.reverseArray(this.dimensions);
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			int swap = this.dimensions[this.dimensions.length - 1];
 			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
 			this.dimensions[this.dimensions.length - 2] = swap;
@@ -1408,7 +1408,7 @@ public class JavaToR {
 		if (subarrayLength != 0)
 			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
+		// These three variables are used only for COLUMN_MINOR
 		int rowCount = this.dimensions[this.dimensions.length - 2];
 		int columnCount = this.dimensions[this.dimensions.length - 1];
 		int matrixIndex = 0;
@@ -1445,7 +1445,7 @@ public class JavaToR {
 					currentSubarrayIndex[j] = 0;
 				}
 				break;
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int j = 0; j < columnCount; j++)
 					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
 				if ((i + 1) % rowCount == 0) {
@@ -1471,7 +1471,7 @@ public class JavaToR {
 		case COLUMN_MAJOR:
 			Utility.reverseArray(this.dimensions);
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			int swap = this.dimensions[this.dimensions.length - 1];
 			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
 			this.dimensions[this.dimensions.length - 2] = swap;
@@ -1492,7 +1492,7 @@ public class JavaToR {
 		if (subarrayLength != 0)
 			subarrayCount = flatArrayLength / subarrayLength;
 		int[] currentSubarrayIndex = new int[this.dimensions.length - 1];
-		// These three variables are used only for ROW_MAJOR_JAVA
+		// These three variables are used only for COLUMN_MINOR
 		int rowCount = this.dimensions[this.dimensions.length - 2];
 		int columnCount = this.dimensions[this.dimensions.length - 1];
 		int matrixIndex = 0;
@@ -1529,7 +1529,7 @@ public class JavaToR {
 					currentSubarrayIndex[j] = 0;
 				}
 				break;
-			case ROW_MAJOR_JAVA:
+			case COLUMN_MINOR:
 				for (int j = 0; j < columnCount; j++)
 					flatArray[currentFlatArrayIndex + rowCount * j] = subarray[j];
 				if ((i + 1) % rowCount == 0) {
@@ -1555,7 +1555,7 @@ public class JavaToR {
 		case COLUMN_MAJOR:
 			Utility.reverseArray(this.dimensions);
 			break;
-		case ROW_MAJOR_JAVA:
+		case COLUMN_MINOR:
 			int swap = this.dimensions[this.dimensions.length - 1];
 			this.dimensions[this.dimensions.length - 1] = this.dimensions[this.dimensions.length - 2];
 			this.dimensions[this.dimensions.length - 2] = swap;

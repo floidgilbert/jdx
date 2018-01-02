@@ -118,7 +118,7 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
         rJava::.jcall(
           jdx.utility
           , "Ljava/lang/Object;"
-          , "createNdimensionalArrayRowMajorJava"
+          , "createNdimensionalArrayColumnMinor"
           , rJava::.jarray(value, dispatch = FALSE)
           , dimensions
           , check = TRUE
