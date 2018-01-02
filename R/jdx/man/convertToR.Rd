@@ -25,7 +25,7 @@ An \pkg{rJava} object reference.
 A logical vector of length one specifying whether string vectors are automatically converted to factors when Java objects are converted to R data frames. This parameter is discussed in the vignette under \href{../doc/Introduction.html#java_maps}{Java Maps}.
 }
   \item{array.order}{
-A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, \code{"row-major-java"}. See \href{../doc/Introduction.html#java_arrays}{Java One-dimensional Arrays and N-dimensional Rectangular Arrays} in the vignette.
+A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#java_arrays}{Java One-dimensional Arrays and N-dimensional Rectangular Arrays} in the vignette.
 }
 }
 

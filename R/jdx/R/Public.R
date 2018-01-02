@@ -107,7 +107,7 @@ convertToJava <- function(value, length.one.vector.as.array = FALSE, scalars.as.
           , check = TRUE
         )
       )
-    if (array.order == "row-major-java") {
+    if (array.order == "column-minor") {
       dimensions <- rev(dim(value))
       dimensions.length <- length(dimensions)
       # Swap row/column dimensions
@@ -244,8 +244,8 @@ arrayOrderToString <- function(value) {
     return("row-major")
   if (rJava::.jequals(value, array.order.values$`column-major`))
     return("column-major")
-  if (rJava::.jequals(value, array.order.values$`row-major-java`))
-    return("row-major-java")
+  if (rJava::.jequals(value, array.order.values$`column-minor`))
+    return("column-minor")
   NULL
 }
 

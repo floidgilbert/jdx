@@ -32,7 +32,7 @@ A logical vector of length one. See \href{../doc/Introduction.html#r_vectors_of_
 A logical vector of length one. See \href{../doc/Introduction.html#r_vectors_of_length_one}{R Vectors of Length One} in the vignette.
 }
   \item{array.order}{
-A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, \code{"row-major-java"}. See \href{../doc/Introduction.html#r_n_dimensional_arrays}{R Matrices and N-dimensional Arrays} in the vignette.
+A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#r_n_dimensional_arrays}{R Matrices and N-dimensional Arrays} in the vignette.
 }
   \item{data.frame.row.major}{
 A logical vector of length one. When \code{TRUE} (the default), a data frame is converted to a list of map objects that represent rows. When \code{FALSE}, a data frame is converted to a map of arrays that represent columns. Conversion for column-major order is much faster than row-major order. See \href{../doc/Introduction.html#r_data_frames}{R Data Frames} in the vignette.
