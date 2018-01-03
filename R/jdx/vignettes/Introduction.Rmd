@@ -22,7 +22,7 @@ load(rdata.tables)
 
 The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbanek's [rJava](https://cran.r-project.org/package=rJava) package to simplify and extend data exchange between R and Java. The jdx package was originally developed to provide data exchange functionality for the [jsr223](https://cran.r-project.org/package=jsr223) package, a high-level scripting interface for the Java platform. We provide jdx to developers who may want to extend existing rJava solutions. Developers of new applications are encouraged to use jsr223 for rapid application development with a relatively low learning curve.
 
-The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including various index ordering schemes for arrays and data frames.
+The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including various ordering schemes for arrays and data frames.
 
 For those familar with the technical details of rJava, here are two important notes to consider. First, the jdx package behavior diverges from rJava for `raw` values and Java types `byte` and `java.lang.Byte`. Please see [R raw Values and Java byte Values](#R_raw_Java_byte) for more information. Second, jdx does not use or load rJava's companion package JRI (the Java/R Interface).
 
@@ -80,7 +80,7 @@ convertToJava(
 )
 ```
 
-The parameters `length.one.vector.as.array` and `scalars.as.objects` control if and how length one vectors are converted to Java scalars. The parameter `array.order` affects the index order of n-dimensional arrays. The parameter `data.frame.row.major` specifies whether data frames are converted using row-major or column-major order. Finally, `coerce.factors` determines whether an attempt should be made to coerce the character vector backing factors to `double`, `int`, or `boolean` Java arrays. The following sections cover each of these topics in detail as well as data conversion rules and behaviors.
+The parameters `length.one.vector.as.array` and `scalars.as.objects` control if and how length one vectors are converted to Java scalars. The parameter `array.order` affects the data ordering of n-dimensional arrays. The parameter `data.frame.row.major` specifies whether data frames are converted using row-major or column-major order. Finally, `coerce.factors` determines whether an attempt should be made to coerce the character vector backing factors to `double`, `int`, or `boolean` Java arrays. The following sections cover each of these topics in detail as well as data conversion rules and behaviors.
 
 **NOTE:** The `convertToJava()` function preserves only column names when copying R data frames to Java objects: not row names. Neither column nor row names are preserved when copying n-dimensional arrays to Java objects. 
 
@@ -158,17 +158,23 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 ### R Matrices and N-dimensional Arrays # {#r_n_dimensional_arrays}
 
-The jdx package supports data exchange for matrices and other n-dimensional arrays. Three array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. Note that these settings control index ordering, not *array storage order*. We highlight this difference because the terms *row-major*, *column-major*, and *column-minor* can be used to describe both array storage order in memory and array indexing order in syntax. For example, R n-dimensional arrays use column-major storage order: the elements in each column are stored consecutively in memory, and the elememts of one column have lower memory addresses than the elements of the next column. The R language syntax, on the other hand, uses row-major indexing. For the matrix `a`, the expression `a[1, 2]` returns the element in the first row and second column. That is, the row is represented by the first (i.e., major) index. Hence, the array storage order does not follow the indexing scheme in R.
+The jdx package supports data exchange for matrices and other n-dimensional arrays. Three ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. These parameters control how the destination Java array is constructed.
 
-Before describing the indexing schemes in jdx, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion (see [Iliffe vectors](https://en.wikipedia.org/wiki/Iliffe_vector) for more information). In contrast, R n-dimensional arrays, are stored in memory as a one-dimensional array and the data are retrieved in the appropriate order using indexing arithmetic. 
+Before describing the ordering schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. 
 
-Now we describe the each of the `array.order` indexing options.
+<!-- Java n-dimensional arrays are literally constructed in this fashion (see [Iliffe vectors](https://en.wikipedia.org/wiki/Iliffe_vector) for more information). -->
 
-+ `'row-major'` -- The indexes of an n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R uses this indexing scheme (despite the fact that R stores the data in column-major order). This row-major scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
+<!-- In contrast, R n-dimensional arrays, are stored in memory as a one-dimensional array and the data are retrieved in the appropriate order using indexing arithmetic. -->
 
-+ `'column-major'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][column][row]`. This ordering scheme is natural for Java programmers: the data contained in the one-dimensional arrays represent columns of the parent matrix.
+<!-- Note that these settings control index ordering, not necessarily *array storage order*. We highlight this difference because the terms *row-major*, *column-major*, and *column-minor* can be used to describe both array storage order in memory and array indexing order in syntax. For example, R n-dimensional arrays use column-major storage order: the elements in each column are stored consecutively in memory, and the elememts of one column have lower memory addresses than the elements of the next column. The R language syntax, on the other hand, uses row-major indexing. For the matrix `a`, the expression `a[1, 2]` returns the element in the first row and second column. That is, the row is represented by the first (i.e., major) index. Hence, the storage order does not follow the indexing scheme in R. -->
 
-+ `'column-minor'` -- The indexes of an n-dimensional array are ordered `[n]...[matrix][row][column]`. This provides Java programmers with a natural indexing scheme where the arrays at the one-dimensional level represent rows of the parent matrix. For matrices, `'column-minor'` and `'row-major'` are equivalent.
+Now we describe the each of the `array.order` options.
+
++ `'row-major'` -- The data of the resulting Java n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R syntax uses this indexing scheme (though R stores the array in memory using column-major order). This row-major scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
+
++ `'column-major'` -- The data of the resulting Java n-dimensional array are ordered `[n]...[matrix][column][row]`. This ordering scheme is natural for Java programmers: the data contained in the one-dimensional arrays represent columns of the parent matrix.
+
++ `'column-minor'` -- The data of the resulting Java n-dimensional array are ordered `[n]...[matrix][row][column]`. This provides Java programmers with a natural ordering scheme where the arrays at the one-dimensional level represent rows of the parent matrix. For matrices, `'column-minor'` and `'row-major'` are equivalent.
 
 **NOTE:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
 
@@ -250,7 +256,13 @@ pander::pander(
 
 ### Java One-dimensional Arrays and N-dimensional Rectangular Arrays # {#java_arrays}
 
-The `convertToR()` function converts one-dimensional Java arrays to R vectors and it converts n-dimensional rectangular Java arrays to n-dimensional R arrays. The `array.order` parameter controls index ordering for n-dimensional arrays. The behavior of `array.order` is the same as in `convertToJava()`. See [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays) for details.
+The `convertToR()` function converts one-dimensional Java arrays to R vectors and it converts n-dimensional rectangular Java arrays to n-dimensional R arrays. The `array.order` parameter controls how the data are ordered when copying from Java to R. The possible `array.order` parameters are described as follows. (For a more detailed discussion, see [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays).)
+
++ `'row-major'` -- The data in the Java n-dimensional array are assumed to be in `[row][column][matrix]...[n]` order.
+
++ `'column-major'` -- The data in the Java n-dimensional array are assumed to be in `[n]...[matrix][column][row]` order.
+
++ `'column-minor'` -- The data in the source Java n-dimensional array are assumed to be in `[n]...[matrix][row][column]` order. For matrices, `'column-minor'` and `'row-major'` are equivalent.
 
 **NOTE:** If an R array is converted to Java using a particular array order, use the same array order when converting it back from Java to R. Otherwise, the data will be in the wrong order.
 

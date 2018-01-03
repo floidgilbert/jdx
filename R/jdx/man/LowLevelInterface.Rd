@@ -40,7 +40,7 @@ processCompositeDataCode(
 An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR$ArrayOrder} enumeration value.
 }
   \item{j2r}{
-An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object. The \code{createJavaToRobject} function can be used to create an instance.
+An \pkg{rJava} object reference to a \code{org.fgilbert.jdx.JavaToR} object. The \code{createJavaToRobject} function creates an instance.
 }
   \item{data.code}{
 A \pkg{jdx} data code value created with \code{processCompositeDataCode}.

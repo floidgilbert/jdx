@@ -22,7 +22,7 @@ convertToJava(
 
 \arguments{
   \item{value}{
-An R vector, matrix, array, table, factor, data frame, list, or environment. Nested lists are supported. Supported data types: numeric, integer, character, logical, and raw.
+An R vector, matrix, n-dimensional array, table, factor, data frame, list, or environment. Nested lists are supported. Supported data types: numeric, integer, character, logical, and raw.
 
 }
   \item{length.one.vector.as.array}{
@@ -32,7 +32,7 @@ A logical vector of length one. See \href{../doc/Introduction.html#r_vectors_of_
 A logical vector of length one. See \href{../doc/Introduction.html#r_vectors_of_length_one}{R Vectors of Length One} in the vignette.
 }
   \item{array.order}{
-A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#r_n_dimensional_arrays}{R Matrices and N-dimensional Arrays} in the vignette.
+A character vector of length one specifying the order when copying R n-dimensional arrays to Java. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#r_n_dimensional_arrays}{R Matrices and N-dimensional Arrays} in the vignette.
 }
   \item{data.frame.row.major}{
 A logical vector of length one. When \code{TRUE} (the default), a data frame is converted to a list of map objects that represent rows. When \code{FALSE}, a data frame is converted to a map of arrays that represent columns. Conversion for column-major order is much faster than row-major order. See \href{../doc/Introduction.html#r_data_frames}{R Data Frames} in the vignette.
@@ -60,13 +60,13 @@ A Java object reference or an R vector. See the \href{../doc/Introduction.html}{
 \examples{
 library("jdx")
 
-# Convert matrix using column-major index ordering
+# Convert matrix using column-major ordering
 m <- matrix(1:4, 2, 2)
 o = convertToJava(m, array.order = "column-major")
 getJavaClassName(o)
 identical(m, convertToR(o, array.order = "column-major"))
 
-# Convert 4-dimensional array using row-major index ordering
+# Convert 4-dimensional array using row-major ordering
 dimensions <- c(3, 2, 2, 2)
 a = array(1:prod(dimensions), dimensions)
 o = convertToJava(a, array.order = "row-major")

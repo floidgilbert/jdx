@@ -25,7 +25,7 @@ An \pkg{rJava} object reference.
 A logical vector of length one specifying whether string vectors are automatically converted to factors when Java objects are converted to R data frames. This parameter is discussed in the vignette under \href{../doc/Introduction.html#java_maps}{Java Maps}.
 }
   \item{array.order}{
-A character vector of length one specifying the indexing order for n-dimensional arrays. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#java_arrays}{Java One-dimensional Arrays and N-dimensional Rectangular Arrays} in the vignette.
+A character vector of length one specifying the order used to copy Java n-dimensional arrays to R. Valid values are \code{"row-major"}, \code{"column-major"}, and \code{"column-minor"}. See \href{../doc/Introduction.html#java_arrays}{Java One-dimensional Arrays and N-dimensional Rectangular Arrays} in the vignette.
 }
 }
 
@@ -47,13 +47,13 @@ An R object. See the \href{../doc/Introduction.html}{vignette} for details.
 \examples{
 library("jdx")
 
-# Convert matrix using column-major index ordering
+# Convert matrix using column-major ordering
 m <- matrix(1:4, 2, 2)
 o = convertToJava(m, array.order = "column-major")
 getJavaClassName(o)
 identical(m, convertToR(o, array.order = "column-major"))
 
-# Convert 4-dimensional array using row-major index ordering
+# Convert 4-dimensional array using row-major ordering
 dimensions <- c(3, 2, 2, 2)
 a = array(1:prod(dimensions), dimensions)
 o = convertToJava(a, array.order = "row-major")
