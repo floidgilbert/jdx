@@ -105,7 +105,7 @@ The following two tables detail the behavior of `convertToJava()` for length-one
 pander::pander(
   r2j.length.one.vector.scalars.as.objects.false
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToJava()` behavior for length-one vectors when `length.one.vector.as.array = FALSE` and `scalars.as.objects = FALSE`"
   , emphasize.strong.rows = 1
@@ -123,7 +123,7 @@ pander::pander(
 pander::pander(
   r2j.length.one.vector.scalars.as.objects.true
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToJava()` behavior for length-one vectors when `length.one.vector.as.array = FALSE` and `scalars.as.objects = TRUE`"
   , emphasize.strong.rows = 1
@@ -143,7 +143,7 @@ The `convertToJava()` functionality for vectors, one-dimensional arrays, and one
 pander::pander(
   r2j.vectors
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToJava()` behavior for vectors, one-dimensional arrays, and one-dimensional tables"
   , emphasize.strong.rows = 1
@@ -158,7 +158,7 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 ### R Matrices and N-dimensional Arrays # {#r_n_dimensional_arrays}
 
-The jdx package supports data exchange for matrices and other n-dimensional arrays. Three array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. Note that these are *index ordering* settings, not *array storage order* settings. We highlight this difference because the terms *row-major* and *column-major* are used to describe array storage order in memory and array indexing order in syntax. For example, R n-dimensional arrays use column-major storage order: the elements in each column are stored consecutively in memory, and the elememts of one column have lower memory addresses than the elements of the next column. The R language syntax, on the other hand, uses row-major indexing. For a matrix `a`, the expression `a[1, 2]` returns the element in the first row and second column. That is, the row is represented by the first (i.e., major) index. Hence, the array storage order does not follow the indexing scheme in R. This is in contrast to the Java language where the construction of an n-dimensional array dictates the indexing scheme.
+The jdx package supports data exchange for matrices and other n-dimensional arrays. Three array index ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. Note that these settings control index ordering, not *array storage order*. We highlight this difference because the terms *row-major*, *column-major*, and *column-minor* can be used to describe both array storage order in memory and array indexing order in syntax. For example, R n-dimensional arrays use column-major storage order: the elements in each column are stored consecutively in memory, and the elememts of one column have lower memory addresses than the elements of the next column. The R language syntax, on the other hand, uses row-major indexing. For the matrix `a`, the expression `a[1, 2]` returns the element in the first row and second column. That is, the row is represented by the first (i.e., major) index. Hence, the array storage order does not follow the indexing scheme in R.
 
 Before describing the indexing schemes in jdx, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. Java n-dimensional arrays are literally constructed in this fashion (see [Iliffe vectors](https://en.wikipedia.org/wiki/Iliffe_vector) for more information). In contrast, R n-dimensional arrays, are stored in memory as a one-dimensional array and the data are retrieved in the appropriate order using indexing arithmetic. 
 
@@ -185,7 +185,7 @@ The following table shows how `convertToJava()` maps n-dimensional R structures 
 pander::pander(
   r2j.arrays
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToJava()` behavior for n-dimensional arrays and tables"
   , emphasize.strong.rows = 1
@@ -241,7 +241,7 @@ The `convertToR()` function converts Java scalars to length-one R vectors. Scala
 pander::pander(
   j2r.scalars
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToR()` behavior for Java scalars"
   , emphasize.strong.rows = 1
@@ -267,7 +267,7 @@ If an object array contains `null`, it is replaced by the appropriate R `NA` val
 pander::pander(
   j2r.arrays
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToR()` behavior for one-dimensional Java arrays and n-dimensional Java arrays"
   , emphasize.strong.rows = 1
@@ -299,7 +299,7 @@ The `convertToR()` parameters `array.order` and `strings.as.factors` behave the 
 pander::pander(
   j2r.collections
   , split.cells = c("0%", "20%", "20%", "20%", "40%")
-  , split.table = 120
+  , split.table = 200
   , justify = "left"
   , caption = "`convertToR()` behavior for Java objects implementing the `java.util.Collection` interface"
   , emphasize.strong.rows = 1

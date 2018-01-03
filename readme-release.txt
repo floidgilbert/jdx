@@ -1,9 +1,9 @@
-Build and release instructions for jdx. Instructions are specific to RStudio and Eclipse IDE for Java.
+This document contains build and release instructions for jdx. Instructions are specific to RStudio and Eclipse IDE for Java.
 
 - Make sure the following packages are installed/updated.
 
-  rmarkdown
   pander
+  rmarkdown
   roxygen2
   testthat
 
@@ -18,7 +18,7 @@ Build and release instructions for jdx. Instructions are specific to RStudio and
     NOTE: As of this writing, there is not a JAR manifest file. If you add one, update the versions in the manifest file.
     Double-click *.jardesc objects in the project explorer to change output file names.
 
----- Build both source and binary-only JAR files (right-click *.jardesc files in project explorer and select `Create Jar`).
+---- Build both source and binary JAR files (right-click *.jardesc files in project explorer and select `Create Jar`).
 
 - In R project...
 
@@ -31,10 +31,10 @@ Build and release instructions for jdx. Instructions are specific to RStudio and
 --- Change version numbers and dependencies in DESCRIPTION file.
 
 --- Build and test R project.
-    Run standard tests using Ctrl + Shift + T.
+    Run standard tests with `devtools::test()`.
     Run the non-distributed tests in the tests folder above the R project folder. Be sure to read any testing instructions carefully.
     Run the tests included in the jsr223 package. (The jdx package was originally part of jsr223, and writing the tests is easier with jsr223 scripting.)
-    Run CRAN tests.
+    Run `devtools::check()`.
 
 --- Build R project source package.
 
