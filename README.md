@@ -4,3 +4,5 @@ The [jdx](https://cran.r-project.org/package=jdx) package builds on Simon Urbane
 
 The jdx package converts R data structures to generic Java objects and vice versa. In particular, R vectors, n-dimensional arrays, factors, data frames, tables, environments, and lists are converted to Java objects. Java scalars and n-dimensional arrays are converted to R vectors and n-dimensional arrays. Java maps and collections are converted to R lists, data frames, vectors, or n-dimensional arrays depending on content. Several options are available for data conversion including various ordering schemes for arrays and data frames.
 
+For full documentation, see the vignette included with the R package.
+
