@@ -40,4 +40,3 @@ This document contains build and release instructions for jdx. Instructions are 
 
 - Update release notes/news.
 
-- ///how to submit to CRAN, etc.

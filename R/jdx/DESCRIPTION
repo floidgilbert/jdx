@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R: c(person(given="Floid R.", family="Gilbert", role=c("aut","cre"), email="floid.r.gilbert@gmail.com"), person(given="David B.", family="Dahl", role=c("aut"), email="dahl@stat.byu.edu"))
 Author: Floid R. Gilbert [aut, cre], David B. Dahl [aut]
 Maintainer: Floid R. Gilbert <floid.r.gilbert@gmail.com>
-Description: This package simplifies exchanging data structures between R and Java.
+Description: Simplifies and extends data exchange between R and Java.
 License: GPL (>= 2) | BSD_3_clause + file LICENSE
 Encoding: UTF-8
 Imports: rJava (>= 0.9-8), utils (>= 3.3.0)
@@ -14,4 +14,6 @@ RoxygenNote: 6.0.1
 Suggests: testthat, knitr, rmarkdown, pander
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2017-08-09 19:27:56 UTC; Floid
+Packaged: 2018-01-03 19:27:56 UTC; Floid
+URL: https://github.com/floidgilbert/jdx
+BugReports: https://github.com/floidgilbert/jdx/issues
