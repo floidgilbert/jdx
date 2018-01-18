@@ -10,7 +10,7 @@ Low-level Interface for jdx
 }
 
 \description{
-The functions listed here are the low-level interface for \CRANpkg{jdx} and are primarily used behind the scenes in \CRANpkg{jsr223}, the high-level integration package for Java. However, these functions may also be useful for \CRANpkg{rJava} developers interested in a thread-safe alternative to \code{\link{convertToR}}. See the code examples for a brief outline. If multi-threaded access is not required, please use \code{\link{convertToR}}.
+The functions listed here are the low-level interface for \CRANpkg{jdx} and are primarily used behind the scenes in \pkg{jsr223}, the high-level integration package for Java. However, these functions may also be useful for \CRANpkg{rJava} developers interested in a thread-safe alternative to \code{\link{convertToR}}. See the code examples for a brief outline. If multi-threaded access is not required, please use \code{\link{convertToR}}.
 }
 
 \usage{

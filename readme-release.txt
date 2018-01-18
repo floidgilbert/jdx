@@ -38,5 +38,7 @@ This document contains build and release instructions for jdx. Instructions are 
 
 --- Build R project source package.
 
+--- Test source package package using `R CMD check --as-cran`
+
 - Update release notes/news.
 

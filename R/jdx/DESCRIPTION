@@ -1,19 +1,17 @@
 Package: jdx
 Type: Package
-Title: Java Data Exchange for R and rJava
-Version: 0.1.0
+Title: 'Java' Data Exchange for 'R' and 'rJava'
+Description: Simplifies and extends data exchange between 'R' and 'Java'.
+Version: 0.1.1
 Authors@R: c(person(given="Floid R.", family="Gilbert", role=c("aut","cre"), email="floid.r.gilbert@gmail.com"), person(given="David B.", family="Dahl", role=c("aut"), email="dahl@stat.byu.edu"))
-Author: Floid R. Gilbert [aut, cre], David B. Dahl [aut]
-Maintainer: Floid R. Gilbert <floid.r.gilbert@gmail.com>
-Description: Simplifies and extends data exchange between R and Java.
 License: GPL (>= 2) | BSD_3_clause + file LICENSE
 Encoding: UTF-8
 Imports: rJava (>= 0.9-8), utils (>= 3.3.0)
-SystemRequirements: Java Runtime Environment (>= 1.8)
+SystemRequirements: Java Runtime Environment (>= 8)
 RoxygenNote: 6.0.1
 Suggests: testthat, knitr, rmarkdown, pander
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-01-03 19:27:56 UTC; Floid
+Packaged: 2018-01-18 20:52:00 UTC; Floid
 URL: https://github.com/floidgilbert/jdx
 BugReports: https://github.com/floidgilbert/jdx/issues

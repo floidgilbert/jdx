@@ -1,0 +1,17 @@
+// // // // // // // // // // // // // // // // // // // // // // // // // //
+//                                                                         // 
+// News for package jdx                                                    //
+//                                                                         //
+// // // // // // // // // // // // // // // // // // // // // // // // // //
+
+* * * 2018-01-18 v 0.1.1 * * *
+
+- Changed Java version format in DESCRIPTION file.
+
+- Updated installation instructions to execute `R CMD javareconf` in the event 
+  rJava dependency fails to install properly.
+
+
+* * * 2018-01-04 v 0.1.0 * * *
+
+- Initial release.

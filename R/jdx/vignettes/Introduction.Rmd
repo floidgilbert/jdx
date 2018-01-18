@@ -32,7 +32,9 @@ For those familar with the technical details of rJava, here are two important no
 
 The jdx package requires Java 8 Standard Edition or above. The current version of the Java Runtime Environment (JRE) can be determined by executing `java -version` from a system command prompt. Java 8 is denoted by version 1.8.x_xx. The JRE can be obtained from [Oracle's web site](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html). Select the architecture (32 or 64 bit) that matches your R installation.
 
-The jdx package runs on a standard installation of R (e.g., the R build option `--enable-R-shlib` is not required).  Install jdx with the usual command: `install.packages("jdx")`.
+The jdx package runs on a standard installation of R (e.g., the R build option `--enable-R-shlib` is not required).
+
+Install jdx with the usual command: `install.packages("jdx")`. This command will automatically download and install rJava if necessary. If the rJava installation fails, make sure R is configured to use Java. For Linux/OSX, use `sudo R CMD javareconf`. For Windows, open a command prompt "As Administrator" and execute `R CMD javareconf`. If there are errors after executing the command, address them, then execute the Java configuration command again. One common error can be resolved by determining whether the GNU Compiler Collection (GCC) is accessible. To check for GCC, execute `gcc --help` from a terminal. This command will fail if GCC is not installed or if the license agreement has not been accepted.
 
 ## Primary Functions
 
