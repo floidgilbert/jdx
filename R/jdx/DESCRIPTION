@@ -2,7 +2,7 @@ Package: jdx
 Type: Package
 Title: 'Java' Data Exchange for 'R' and 'rJava'
 Description: Simplifies and extends data exchange between 'R' and 'Java'.
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(person(given="Floid R.", family="Gilbert", role=c("aut","cre"), email="floid.r.gilbert@gmail.com"), person(given="David B.", family="Dahl", role=c("aut"), email="dahl@stat.byu.edu"))
 License: GPL (>= 2) | BSD_3_clause + file LICENSE
 Encoding: UTF-8

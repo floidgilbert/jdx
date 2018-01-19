@@ -9,7 +9,8 @@ This document contains build and release instructions for jdx. Instructions are 
 
 - Close all sessions using the package.
 
-- Uninstall jdx: `remove.packages("jdx")`. Sometimes the JAR files fail to update during build in RStudio.
+- Uninstall jdx: `detach("package:jdx", unload=TRUE); remove.packages("jdx")`
+  Sometimes the JAR files fail to update during build in RStudio.
 
 - In Java project...
 
@@ -25,7 +26,8 @@ This document contains build and release instructions for jdx. Instructions are 
 --- Add roxygen @export* comments to any new exported functions/classes.
     The NAMESPACE file will automatically be updated when the project is rebuilt (if using RStudio and original Rproj file).
 
---- Update documentation (man files and vignettes). Use `devtools::install(build_vignettes = TRUE)` to preview vignette build in package.
+--- Update documentation (man files and vignettes). Use `devtools::install(build_vignettes = TRUE)` to preview vignette 
+    build in package.
     Test all links in the documentation.
 
 --- Change version numbers and dependencies in DESCRIPTION file.
@@ -38,7 +40,8 @@ This document contains build and release instructions for jdx. Instructions are 
 
 --- Build R project source package.
 
---- Test source package package using `R CMD check --as-cran`
+--- Move source package into an empty directory and check it using `R CMD check --as-cran`
 
-- Update release notes/news.
+- Update release notes/news (R/jdx/NEWS).
 
+- Create release tag in GIT repository. https://github.com/floidgilbert/jdx/releases
