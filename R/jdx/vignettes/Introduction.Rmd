@@ -34,7 +34,7 @@ The jdx package requires Java 8 Standard Edition or above. The current version o
 
 The jdx package runs on a standard installation of R (e.g., the R build option `--enable-R-shlib` is not required).
 
-Install jdx with the usual command: `install.packages("jdx")`. This command will automatically download and install rJava if necessary. If the rJava installation fails, make sure R is configured to use Java. For Linux/OSX, use `sudo R CMD javareconf`. For Windows, open a command prompt "As Administrator" and execute `R CMD javareconf`. If there are errors after executing the command, address them, then execute the Java configuration command again. One common error can be resolved by determining whether the GNU Compiler Collection (GCC) is accessible. To check for GCC, execute `gcc --help` from a terminal. This command will fail if GCC is not installed or if the license agreement has not been accepted.
+Install jdx with the usual command: `install.packages("jdx")`. This command will automatically download and install rJava if necessary. If the rJava installation fails, make sure R is configured to use Java. For Linux/OSX, execute `sudo R CMD javareconf` in a terminal. For Windows, open a command prompt "As Administrator" and execute `R CMD javareconf`. If there are errors after executing the Java configuration command, address the errors, then execute the command again. One common error can be resolved by determining whether the GNU Compiler Collection (GCC) is accessible. To check for GCC, execute `gcc --help` from a terminal. This command will fail if GCC is not installed or if the license agreement has not been accepted.
 
 ## Primary Functions
 
@@ -162,7 +162,7 @@ R factors are comprised of a `character` vector of levels and an `integer` vecto
 
 ### R Matrices and N-dimensional Arrays # {#r_n_dimensional_arrays}
 
-The jdx package supports data exchange for matrices and other n-dimensional arrays. Three ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. These parameters control how the destination Java array is constructed.
+The jdx package supports data exchange for matrices and other n-dimensional arrays. Three ordering schemes are available via the `convertToJava()` parameter `array.order`: `'row-major'`, `'column-major'`, and `'column-minor'`. These settings control how the destination Java array is constructed.
 
 Before describing the ordering schemes, it is helpful to think of n-dimensional arrays as collections of smaller structures. A one-dimensional array (a vector) is a collection of scalars. A two-dimensional array (a matrix) is a collection of one-dimensional arrays representing either rows or columns of the matrix. A three-dimensional array (a rectangular prism or cube) is a collection of matrices. A four-dimensional array is a collection of cubes, and so forth. 
 
@@ -260,7 +260,7 @@ pander::pander(
 
 ### Java One-dimensional Arrays and N-dimensional Rectangular Arrays # {#java_arrays}
 
-The `convertToR()` function converts one-dimensional Java arrays to R vectors and it converts n-dimensional rectangular Java arrays to n-dimensional R arrays. The `array.order` parameter controls how the data are ordered when copying from Java to R. The possible `array.order` parameters are described as follows. (For a more detailed discussion, see [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays).)
+The `convertToR()` function converts one-dimensional Java arrays to R vectors and it converts n-dimensional rectangular Java arrays to n-dimensional R arrays. The `array.order` parameter controls how the data are ordered when copying from Java to R. The possible `array.order` options are described as follows. (For a more detailed discussion, see [R Matrices and N-dimensional Arrays](#r_n_dimensional_arrays).)
 
 + `'row-major'` -- The data in the Java n-dimensional array are assumed to be in `[row][column][matrix]...[n]` order.
 
@@ -297,6 +297,8 @@ Java n-dimensional arrays whose subarrays of a given dimension are not the same 
 ### Java Maps # {#java_maps}
 
 The `convertToR()` function attempts to convert Java objects implementing the `Map` interface to named lists or data frames. The map keys must be string values. If the map contains multiple same-length arrays, or same-length collections that can be converted to arrays, the map will be converted to a data frame. Otherwise, the object will be converted to a named list.
+
+**NOTE:** Nashorn JavaScript objects are handled as Java `Map` objects. Hence, JavaScript objects can easily be converted to R named lists or data frames.
 
 The `strings.as.factors` parameter of the `convertToR()` function controls whether string arrays are automatically converted to factors when creating a data frame. If `strings.as.factors = NULL` (the default), the R system setting is used (see `base::getOption("stringsAsFactors")`). When `strings.as.factors = TRUE`, string arrays will be converted to factors. Finally, if `strings.as.factors = FALSE`, the string arrays are converted to `character` vectors.
 
