@@ -30,7 +30,7 @@ This document contains build and release instructions for jdx. Instructions are 
     build in package.
     Test all links in the documentation.
 
---- Change version numbers and dependencies in DESCRIPTION file.
+--- Change version numbers and dependencies in DESCRIPTION file. Update versions and release info in NEWS and user manual.
 
 --- Build and test R project.
     Run standard tests with `devtools::test()`.
@@ -40,8 +40,10 @@ This document contains build and release instructions for jdx. Instructions are 
 
 --- Build R project source package.
 
---- Move source package into an empty directory and check it using `R CMD check --as-cran`
+- Move source package into an empty directory and check it using `R CMD check --as-cran` using Java 8, 9, and 10 (set JAVA_HOME to the appropriate Java folder).
 
-- Update release notes/news (R/jdx/NEWS).
+- Copy source package to releases folder.
+
+- Push changes to GitHub.
 
 - Create release tag in GIT repository. https://github.com/floidgilbert/jdx/releases

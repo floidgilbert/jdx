@@ -172,7 +172,9 @@ Before describing the ordering schemes, it is helpful to think of n-dimensional 
 
 <!-- Note that these settings control index ordering, not necessarily *array storage order*. We highlight this difference because the terms *row-major*, *column-major*, and *column-minor* can be used to describe both array storage order in memory and array indexing order in syntax. For example, R n-dimensional arrays use column-major storage order: the elements in each column are stored consecutively in memory, and the elememts of one column have lower memory addresses than the elements of the next column. The R language syntax, on the other hand, uses row-major indexing. For the matrix `a`, the expression `a[1, 2]` returns the element in the first row and second column. That is, the row is represented by the first (i.e., major) index. Hence, the storage order does not follow the indexing scheme in R. -->
 
-Now we describe the each of the `array.order` options.
+Now we describe the each of the `array.order` options. We use the notation
+`[row][column][matrix]...[n]`
+to mean that, for a given array, the row index (within a column) comes first, followed by the column index (within a matrix), followed by the matrix index (within a cube), etc.
 
 + `'row-major'` -- The data of the resulting Java n-dimensional array are ordered `[row][column][matrix]...[n]`. The jdx package defaults to `'row-major'` because R syntax uses this indexing scheme (though R stores the array in memory using column-major order). This row-major scheme is not intuitive for Java programmers when n > 2 because Java n-dimensional arrays are constructed as high-order objects containing low-order objects.
 
