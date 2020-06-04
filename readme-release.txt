@@ -1,5 +1,7 @@
 This document contains build and release instructions for jdx. Instructions are specific to RStudio and Eclipse IDE for Java.
 
+- Install the latest 'devel' edition of R. IMPORTANT: Do not install the 32-bit modules.
+
 - Make sure the following packages are installed/updated.
 
   pander
