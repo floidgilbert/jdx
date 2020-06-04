@@ -266,7 +266,7 @@ convertToRlowLevel <- function(j2r, data.code = NULL, strings.as.factors = NULL)
     arrays <- rJava::.jevalArray(x[[2]], rawJNIRefSignature = "[Ljava/lang/Object;")
     df <- data.frame(
       lapply(1:(length(types)), evalArray)
-      , stringsAsFactors = ifelse(is.null(strings.as.factors), default.stringsAsFactors(), strings.as.factors)
+      , stringsAsFactors = ifelse(is.null(strings.as.factors), defaultStringsAsFactorsCompatibility(), strings.as.factors)
       , check.names = FALSE
       , fix.empty.names = FALSE
     )

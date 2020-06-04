@@ -302,7 +302,7 @@ The `convertToR()` function attempts to convert Java objects implementing the `M
 
 **NOTE:** Nashorn JavaScript objects are handled as Java `Map` objects. Hence, JavaScript objects can easily be converted to R named lists or data frames.
 
-The `strings.as.factors` parameter of the `convertToR()` function controls whether string arrays are automatically converted to factors when creating a data frame. If `strings.as.factors = NULL` (the default), the R system setting is used (see `base::getOption("stringsAsFactors")`). When `strings.as.factors = TRUE`, string arrays will be converted to factors. Finally, if `strings.as.factors = FALSE`, the string arrays are converted to `character` vectors.
+The `strings.as.factors` parameter of the `convertToR()` function controls whether string arrays are automatically converted to factors when creating a data frame. When `strings.as.factors = TRUE`, string arrays will be converted to factors. If `strings.as.factors = FALSE`, the string arrays are converted to `character` vectors. If set to `NULL`, the behavior follows `default.stringsAsFactors()` for R < 4.1.0, and is set to `FALSE` otherwise.
 
 ### Java Collections # {#java_collections}
 

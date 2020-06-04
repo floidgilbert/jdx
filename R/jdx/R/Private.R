@@ -235,6 +235,12 @@ dataCodeToJNI <- function(data.code) {
   throwUnsupportedDataCodeException(data.code)
 }
 
+defaultStringsAsFactorsCompatibility <- function() {
+  if(getRversion() < "4.1.0")
+    return(default.stringsAsFactors())
+  return(FALSE)
+}
+
 throwUnsupportedDataCodeException <- function(data.code) {
   stop(sprintf("Unsupported data type (type:0x%X, structure:0x%X).", data.code[1], data.code[2]))
 }
